@@ -1,0 +1,4 @@
+databaseChangeLog:
+  - include:
+      file: insert_roles.sql
+      relativeToChangelogFile: true

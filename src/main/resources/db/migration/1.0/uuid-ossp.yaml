@@ -1,0 +1,7 @@
+databaseChangeLog:
+  - changeSet:
+      id: 000-create-uuid-extension
+      author: Andr33w
+      changes:
+        - sql:
+            sql: CREATE EXTENSION IF NOT EXISTS "uuid-ossp"

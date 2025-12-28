@@ -1,8 +1,63 @@
 #
 # application.yml — главный конфигурационный файл Spring Boot.
 
-Что нужно сделать:
-  - Указать настройки подключения к базе данных.
-  - Указать порт приложения.
-  - Настроить параметры безопасности и JWT.
-  - Включить Swagger UI.
+#Что нужно сделать:
+#  - Указать настройки подключения к базе данных.
+#  - Указать порт приложения.
+#  - Настроить параметры безопасности и JWT.
+#  - Включить Swagger UI.
+
+server:
+  port: 700
+
+spring:
+  application:
+    name: bank-rest-service
+  config:
+    import: optional:file:.env[.properties]
+
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://${POSTGRES_HOST}/${POSTGRES_DB}
+    username: ${POSTGRES_USERNAME:postgres}
+    password: ${POSTGRES_PASSWORD}
+
+  main:
+    allow-bean-definition-overriding: true
+
+  jpa:
+    hibernate:
+      ddl-auto: ${DDL_AUTO:none}
+    properties:
+      hibernate:
+        show_sql: ${SHOW_SQL:true}
+        format_sql: ${SHOW_SQL:true}
+        use_sql_comments: true
+        jdbc:
+          time_zone: UTC
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    open-in-view: false
+
+  liquibase:
+    enabled: ${LIQUIBASE_ENABLE:true}
+    change-log: "classpath:db/migration/db.changelog-master.yaml"
+
+jwt:
+  accessTokenLifetime: ${JWT_ACCESS_EXPIRATION_MS}
+  refreshTokenLifetime: ${JWT_REFRESH_EXPIRATION_MS}
+  issuer: ${JWT_ISSUER}
+  audience: ${JWT_AUDIENCE}
+  accessPublic: ${JWT_ACCESS_PUBLIC_KEY}
+  refreshPublic: ${JWT_REFRESH_PUBLIC_KEY}
+  accessPrivate: ${JWT_ACCESS_PRIVATE_KEY}
+  refreshPrivate: ${JWT_REFRESH_PRIVATE_KEY}
+
+logging:
+  level:
+    root: INFO
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info, prometheus, metrics
