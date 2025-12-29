@@ -87,7 +87,7 @@ public class AdminCardServiceImpl implements AdminCardService {
 		@Transactional(readOnly = true)
 		public CardPageViewResponseDto getAllCardsByPage(Integer page, Integer limit) {
 			int pageLimit = utilService.setPageLimit(limit);
-			int paginationPage = (page == null || page < 1) ? 1 : (page - 1);
+			int paginationPage = (page == null || page < 1) ? 0 : (page - 1);
 
 			Pageable pageable = PageRequest.of(paginationPage, pageLimit);
 			Page<Card> cardsPage = cardRepository.findAll(pageable);
@@ -102,7 +102,7 @@ public class AdminCardServiceImpl implements AdminCardService {
 		@Override
 		public CardPageViewResponseDto getAllCardsByClientId(UUID clientId, Integer page) {
 			int pageLimit = 20;
-			int paginationPage = (page == null || page < 1) ? 1 : (page - 1);
+			int paginationPage = (page == null || page < 1) ? 0 : (page - 1);
 			
 			Pageable pageable = PageRequest.of(paginationPage, pageLimit);
 			Page<Card> cardsPage = cardRepository.findAllByClientId(clientId, pageable);

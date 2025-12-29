@@ -109,7 +109,7 @@ public class UserServiceImpl implements UserService {
 	@Transactional(readOnly = true)
 	public UserPageViewResponseDto findAllByPage(Integer page, Integer limit) {
 		int pageLimit = utilService.setPageLimit(limit);
-		int paginationPage = (page == null || page < 1) ? 1 : (page - 1);
+		int paginationPage = (page == null || page < 1) ? 0 : (page - 1);
 		
 		Pageable pageable = PageRequest.of(paginationPage, pageLimit);
 		Page<User> usersPage = userRepository.findAll(pageable);
