@@ -7,10 +7,12 @@ import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.example.bankcards.entity.Role;
+import com.example.bankcards.enums.Claims;
+import com.example.bankcards.enums.TokenType;
 import com.example.bankcards.exception.authorizationException.TokenExpirationException;
 import com.example.bankcards.exception.authorizationException.TokenValidationException;
 import com.example.bankcards.properties.JwtProperties;
-import com.example.bankcards.security.AppUserDetails;
+import com.example.bankcards.security.data.AppUserDetails;
 import com.example.bankcards.util.constant.Constants;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -67,10 +69,14 @@ public class JwtTokenProvider {
 				.withIssuer(jwtProperties.getIssuer())
 				.withAudience(jwtProperties.getAudience())
 				.withSubject(userDetails.getUsername())
-				.withClaim("userId", userDetails.getUser().getId().toString())
-				.withClaim("email", userDetails.getUser().getEmail())
-				.withClaim("tokenType", "access")
-				.withClaim("roles", userDetails.getUser().getRoles().stream().map(Role::getAuthority)
+				.withClaim(Claims.USER_ID.getName(), userDetails.getUser().getId().toString())
+				.withClaim(Claims.EMAIL.getName(), userDetails.getUser().getEmail())
+				.withClaim(Claims.TOKEN_TYPE.getName(), TokenType.ACCESS_TOKEN.getValue())
+				.withClaim(Claims.ROLES.getName(), userDetails
+						.getUser()
+						.getRoles()
+						.stream()
+						.map(Role::getAuthority)
 						.toList())
 				.withIssuedAt(Date.from(now))
 				.withExpiresAt(Date.from(expiry))
@@ -89,8 +95,8 @@ public class JwtTokenProvider {
 				.withIssuer(jwtProperties.getIssuer())
 				.withAudience(jwtProperties.getAudience())
 				.withSubject(userDetails.getUsername())
-				.withClaim("userId", userDetails.getUser().getId().toString())
-				.withClaim("tokenType", "refresh")
+				.withClaim(Claims.USER_ID.getName(), userDetails.getUser().getId().toString())
+				.withClaim(Claims.TOKEN_TYPE.getName(), TokenType.REFRESH_TOKEN.getValue())
 				.withIssuedAt(Date.from(now))
 				.withExpiresAt(Date.from(expiry))
 				.withJWTId(UUID.randomUUID().toString())
@@ -143,7 +149,7 @@ public class JwtTokenProvider {
 	public UUID getUserIdFromRefreshToken(String token) {
 		try {
 			DecodedJWT decodedJWT = getDecodedRefreshToken(token);
-			return UUID.fromString(decodedJWT.getClaim("userId").asString());
+			return UUID.fromString(decodedJWT.getClaim(Claims.USER_ID.getName()).asString());
 		} catch (JWTVerificationException e) {
 			log.error("{}: {}", Constants.FAILED_TO_GET_USER_ID_FROM_TOKEN_MESSAGE, e.getMessage());
 			throw new TokenValidationException(Constants.FAILED_TO_GET_USER_ID_FROM_TOKEN_MESSAGE, e);
@@ -181,13 +187,12 @@ public class JwtTokenProvider {
 	 */
 	public String refreshAccessToken(String refreshToken, AppUserDetails userDetails) {
 		if (validateRefreshToken(refreshToken)) {
-			// Дополнительная проверка: Id пользователя в refresh token должен совпадать
 			UUID tokenUserId = getUserIdFromRefreshToken(refreshToken);
 			if (!tokenUserId.equals(userDetails.getUser().getId())) {
-				throw new RuntimeException("Несовпадение пользовательских данных в токене");
+				throw new TokenValidationException(Constants.TOKEN_DATA_MISMATCH_MESSAGE);
 			}
 			return createAccessToken(userDetails);
 		}
-		throw new TokenValidationException("Токен обновления не прошел валидацию");
+		throw new TokenValidationException(Constants.INVALID_REFRESH_TOKEN_MESSAGE);
 	}
 }

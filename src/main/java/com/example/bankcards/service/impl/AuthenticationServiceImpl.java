@@ -6,7 +6,7 @@ import com.example.bankcards.exception.authorizationException.TokenValidationExc
 import com.example.bankcards.exception.businessException.UserNotFoundException;
 import com.example.bankcards.properties.JwtProperties;
 import com.example.bankcards.repository.UserRepository;
-import com.example.bankcards.security.AppUserDetails;
+import com.example.bankcards.security.data.AppUserDetails;
 import com.example.bankcards.security.component.JwtTokenProvider;
 import com.example.bankcards.service.AuthenticationService;
 import lombok.NonNull;

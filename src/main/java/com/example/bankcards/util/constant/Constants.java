@@ -30,4 +30,6 @@ public class Constants {
 	public static final String FAILED_TO_GET_USER_ID_FROM_TOKEN_MESSAGE = "Не удалось извлечь Id пользователя из токена";
 	
 	public static final String FAILED_TO_READ_SECURITY_KEYS_MESSAGE = "Ошибка чтения ключей шифрования";
+	
+	public static final String TOKEN_DATA_MISMATCH_MESSAGE = "Несовпадение пользовательских данных в токене";
 }

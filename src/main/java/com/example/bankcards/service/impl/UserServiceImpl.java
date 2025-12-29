@@ -14,7 +14,7 @@ import com.example.bankcards.exception.businessException.UserCreationException;
 import com.example.bankcards.exception.businessException.UserNotFoundException;
 import com.example.bankcards.repository.RoleRepository;
 import com.example.bankcards.repository.UserRepository;
-import com.example.bankcards.security.AppUserDetails;
+import com.example.bankcards.security.data.AppUserDetails;
 import com.example.bankcards.service.UserService;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -22,9 +22,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,7 +34,7 @@ import java.util.UUID;
  */
 @Service
 @RequiredArgsConstructor
-public class UserServiceImpl implements UserService, UserDetailsService {
+public class UserServiceImpl implements UserService {
 
 	private final UserRepository userRepository;
 	private final RoleRepository roleRepository;
@@ -151,33 +148,6 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 				() -> new UserNotFoundException("Не найден пользователь с email: %s".formatted(userName)));
 		
 		return userMapper.mapToDto(getUserFromSecurityContext());
-	}
-	
-	
-	/**
-	 * Поиск пользователя по логину. В качестве логина может вы ступать:
-	 * <ul>
-	 *     <li>{@code email}</li>
-	 *     <li>{@code userName}</li>
-	 * </ul>
-	 * @param login поле, идентифицирующее пользователя, чьи данные запрашиваются.
-	 * @return объект, реализующий {@code UserDetails}, содержащий данные профиля пользователя
-	 * @throws UserNotFoundException при неудачной попытке найти пользователя по {@code email} или {@code userName}
-	 */
-	@Override
-	@Transactional(readOnly = true)
-	public UserDetails loadUserByUsername(String login) throws UsernameNotFoundException {
-		try {
-			User user = userRepository.findByUserName(login)
-					.orElseGet(() ->userRepository.findByEmail(login)
-							.orElseThrow(() ->
-									new UsernameNotFoundException("Не найден пользователь с логином: %s".formatted(login)))
-					);
-			return new AppUserDetails(user);
-		}
-		catch (UsernameNotFoundException e) {
-			throw new UserNotFoundException("Не найден пользователь с userName: %s".formatted(login), e);
-		}
 	}
 	
 	@Override

@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.4.4</version>
+        <version>3.4.2</version>
         <relativePath/>
     </parent>
     <groupId>com.example</groupId>
@@ -18,10 +18,9 @@
         <lombok.plugin.version>1.18.38</lombok.plugin.version>
         <mapstruct.version>1.5.5.Final</mapstruct.version>
         <lombok-mapstruct-binding.version>0.2.0</lombok-mapstruct-binding.version>
-        <testcontainers.version>1.21.3</testcontainers.version>
+
         <postgresql.version>42.7.2</postgresql.version>
         <springdoc.version>2.3.0</springdoc.version>
-        <jjwt.version>0.11.5</jjwt.version>
         <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
         <org.liquibase.version>4.28.0</org.liquibase.version>
         <org.mindrot.bcrypt.version>0.4</org.mindrot.bcrypt.version>
@@ -30,7 +29,7 @@
         <io.micrometer.version>1.11.1</io.micrometer.version>
         <org.codehaus.janino.version>3.1.12</org.codehaus.janino.version>
         <org.slf4j.slf4j-api.version>2.0.11</org.slf4j.slf4j-api.version>
-        <oauth.jwt.version>4.5.0</oauth.jwt.version>
+        <oauth.jwt.version>4.4.0</oauth.jwt.version>
     </properties>
 
     <dependencies>
@@ -60,25 +59,6 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>io.jsonwebtoken</groupId>
-            <artifactId>jjwt-api</artifactId>
-            <version>${io.jsonwebtoken.jjwt-gson.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>io.jsonwebtoken</groupId>
-            <artifactId>jjwt-impl</artifactId>
-            <version>${io.jsonwebtoken.jjwt-gson.version}</version>
-            <scope>runtime</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>io.jsonwebtoken</groupId>
-            <artifactId>jjwt-gson</artifactId>
-            <version>${io.jsonwebtoken.jjwt-gson.version}</version>
         </dependency>
 
         <dependency>
@@ -120,27 +100,6 @@
             <groupId>org.mindrot</groupId>
             <artifactId>jbcrypt</artifactId>
             <version>${org.mindrot.bcrypt.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.testcontainers</groupId>
-            <artifactId>testcontainers</artifactId>
-            <version>${testcontainers.version}</version>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.testcontainers</groupId>
-            <artifactId>postgresql</artifactId>
-            <version>${testcontainers.version}</version>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.testcontainers</groupId>
-            <artifactId>junit-jupiter</artifactId>
-            <version>${testcontainers.version}</version>
-            <scope>test</scope>
         </dependency>
 
         <dependency>
