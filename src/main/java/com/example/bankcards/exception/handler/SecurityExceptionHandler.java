@@ -4,12 +4,12 @@ import com.example.bankcards.exception.authorizationException.AuthenticationExce
 import com.example.bankcards.exception.authorizationException.TokenExpirationException;
 import com.example.bankcards.exception.authorizationException.TokenValidationException;
 import com.example.bankcards.exception.dto.ErrorResponseDto;
-import com.example.bankcards.properties.JwtProperties;
 import com.example.bankcards.util.constant.Constants;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
@@ -20,14 +20,15 @@ import java.time.ZonedDateTime;
  * @author 4ndr33w
  * @version 1.0
  */
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class SecurityExceptionHandler {
 	
 	private final ObjectMapper objectMapper;
-	private final JwtProperties properties;
 	
 	public void accessDeniedHandler(HttpServletRequest request, HttpServletResponse response, Exception ex) throws IOException {
+		log.error("ERROR: SecurityExceptionHandler.accessDeniedHandler: {}", ex.getMessage(), ex);
 		printResponse(response, new ErrorResponseDto(
 				HttpStatus.FORBIDDEN.value(),
 				Constants.FORBIDDEN_MESSAGE,
@@ -38,6 +39,7 @@ public class SecurityExceptionHandler {
 	public void unauthorizedHandler(HttpServletRequest request, HttpServletResponse response, Exception ex) throws IOException {
 		String message;
 		
+		log.error("ERROR: SecurityExceptionHandler.unauthorizedHandler: {}", ex.getMessage(), ex);
 		if (ex instanceof TokenExpirationException) {
 			message = Constants.ACCESS_TOKEN_EXPIRED_MESSAGE;
 		} else if (ex instanceof TokenValidationException) {

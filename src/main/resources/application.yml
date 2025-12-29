@@ -52,6 +52,9 @@ jwt:
   accessPrivate: ${JWT_ACCESS_PRIVATE_KEY}
   refreshPrivate: ${JWT_REFRESH_PRIVATE_KEY}
 
+card:
+  binPrefix: ${CARD_BIN_PREFIX}
+
 logging:
   level:
     root: INFO

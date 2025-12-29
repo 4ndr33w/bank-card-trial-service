@@ -8,20 +8,17 @@ import com.example.bankcards.dto.response.UserResponseDto;
 import com.example.bankcards.entity.Role;
 import com.example.bankcards.entity.User;
 import com.example.bankcards.enums.UserRole;
-import com.example.bankcards.exception.authorizationException.SecurityContextHolderException;
 import com.example.bankcards.exception.businessException.RoleNotFoundException;
 import com.example.bankcards.exception.businessException.UserCreationException;
 import com.example.bankcards.exception.businessException.UserNotFoundException;
 import com.example.bankcards.repository.RoleRepository;
 import com.example.bankcards.repository.UserRepository;
-import com.example.bankcards.security.data.AppUserDetails;
 import com.example.bankcards.service.UserService;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,6 +35,7 @@ public class UserServiceImpl implements UserService {
 
 	private final UserRepository userRepository;
 	private final RoleRepository roleRepository;
+	private final UtilService utilService;
 	private final UserMapper userMapper;
 	
 	@Override
@@ -62,7 +60,7 @@ public class UserServiceImpl implements UserService {
 	@Override
 	@Transactional
 	public UserResponseDto update(@NonNull UserUpdateDto update) {
-		UUID authenticatedUserId = getUserIdFromSecurityContext();
+		UUID authenticatedUserId = utilService.getUserIdFromSecurityContext();
 		User existingUser = userRepository.findById(authenticatedUserId)
 				.orElseThrow(
 				() -> new UserNotFoundException("Не найден пользователь с id: %s".formatted(authenticatedUserId)));
@@ -84,7 +82,7 @@ public class UserServiceImpl implements UserService {
 	@Override
 	@Transactional(readOnly = true)
 	public UserResponseDto find() {
-		UUID id = getUserIdFromSecurityContext();
+		UUID id = utilService.getUserIdFromSecurityContext();
 		User existingUser = userRepository.findById(id)
 				.orElseThrow(
 				() -> new UserNotFoundException("Не найден пользователь с id: %s".formatted(id.toString())));
@@ -95,7 +93,7 @@ public class UserServiceImpl implements UserService {
 	@Override
 	@Transactional
 	public void delete() {
-		User authenticatedUser = getUserFromSecurityContext();
+		User authenticatedUser = utilService.getUserFromSecurityContext();
 		userRepository.deleteById(authenticatedUser.getId());
 	}
 	
@@ -110,7 +108,7 @@ public class UserServiceImpl implements UserService {
 	@Override
 	@Transactional(readOnly = true)
 	public UserPageViewResponseDto findAllByPage(Integer page, Integer limit) {
-		int pageLimit = setPageLimit(limit);
+		int pageLimit = utilService.setPageLimit(limit);
 		int paginationPage = (page == null || page < 1) ? 1 : (page - 1);
 		
 		Pageable pageable = PageRequest.of(paginationPage, pageLimit);
@@ -130,16 +128,6 @@ public class UserServiceImpl implements UserService {
 		);
 	}
 	
-	private int setPageLimit(Integer limit) {
-		if(limit == null || limit < 1) {
-			return 5;
-		}
-		if(limit > 20) {
-			return 20;
-		}
-		return limit;
-	}
-	
 	@Override
 	@Transactional(readOnly = true)
 	public UserResponseDto findByUserName(String userName) {
@@ -147,13 +135,13 @@ public class UserServiceImpl implements UserService {
 				.orElseThrow(
 				() -> new UserNotFoundException("Не найден пользователь с email: %s".formatted(userName)));
 		
-		return userMapper.mapToDto(getUserFromSecurityContext());
+		return userMapper.mapToDto(utilService.getUserFromSecurityContext());
 	}
 	
 	@Override
 	@Transactional
 	public boolean block() {
-		User authenticatedUser = getUserFromSecurityContext();
+		User authenticatedUser = utilService.getUserFromSecurityContext();
 		int updatedRows = userRepository.blockUserById(authenticatedUser.getId());
 		return updatedRows > 0;
 	}
@@ -161,35 +149,8 @@ public class UserServiceImpl implements UserService {
 	@Override
 	@Transactional
 	public boolean deactivate() {
-		User authenticatedUser = getUserFromSecurityContext();
+		User authenticatedUser = utilService.getUserFromSecurityContext();
 		int updatedRows = userRepository.deactivateUserById(authenticatedUser.getId());
 		return updatedRows > 0;
-	}
-	
-	private UUID getUserIdFromSecurityContext() {
-		try {
-			return ((AppUserDetails) SecurityContextHolder
-					.getContext()
-					.getAuthentication()
-					.getPrincipal())
-					.getUser()
-					.getId();
-		}
-		catch (Exception e) {
-			throw new SecurityContextHolderException("Ошибка при извлечении данных пользователя", e);
-		}
-	}
-	
-	private User getUserFromSecurityContext() {
-		try {
-			return ((AppUserDetails)SecurityContextHolder
-					.getContext()
-					.getAuthentication()
-					.getPrincipal())
-					.getUser();
-		}
-		catch (Exception e) {
-			throw new SecurityContextHolderException("Ошибка при извлечении данных пользователя", e);
-		}
 	}
 }

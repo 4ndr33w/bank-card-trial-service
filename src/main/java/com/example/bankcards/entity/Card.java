@@ -14,6 +14,7 @@ import lombok.Setter;
 import org.springframework.data.annotation.Version;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.UUID;
 
 /**
@@ -35,7 +36,7 @@ public class Card {
 	private UUID clientId;
 	private String cardNumber;
 	private String cardHolder;
-	private String expirationDate;
+	private LocalDate expirationDate;
 	private String cvv;
 	@Enumerated(EnumType.STRING)
 	private CardStatus status;

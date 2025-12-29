@@ -1,5 +1,7 @@
 package com.example.bankcards.exception.dto;
 
+import com.example.bankcards.config.openapi.constant.DtoSchemaConstants;
+import com.example.bankcards.util.constant.Validation;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -10,16 +12,16 @@ import java.time.ZonedDateTime;
  * @version 1.0
  */
 public record ErrorResponseDto(
-//		@Schema(description = DtoSchemaMessages.EXCEPTION_HTTP_STATUS_DESCRIPTION,
-//				example = DtoSchemaMessages.EXCEPTION_HTTP_STATUS_EXAMPLE)
+		@Schema(description = DtoSchemaConstants.EXCEPTION_HTTP_STATUS_DESCRIPTION,
+				example = DtoSchemaConstants.EXCEPTION_HTTP_STATUS_EXAMPLE)
 		Integer httpStatus,
-//		@Schema(description = DtoSchemaMessages.EXCEPTION_MESSAGE_DESCRIPTION,
-//				example = DtoSchemaMessages.EXCEPTION_MESSAGE_EXAMPLE)
+		@Schema(description = DtoSchemaConstants.EXCEPTION_MESSAGE_DESCRIPTION,
+				example = DtoSchemaConstants.EXCEPTION_MESSAGE_EXAMPLE)
 		String message,
 		
-//		@Schema(description = DtoSchemaMessages.TIMESTAMP_DESCRIPTION,
-//				example = DtoSchemaMessages.TIMESTAMP_EXAMPLE)
-//		@JsonFormat(pattern = Validation.JSON_DATE_TIME_FORMAT)
+		@Schema(description = DtoSchemaConstants.TIMESTAMP_DESCRIPTION,
+				example = DtoSchemaConstants.TIMESTAMP_EXAMPLE)
+		@JsonFormat(pattern = Validation.JSON_DATE_TIME_FORMAT)
 		ZonedDateTime timestamp
 ) {
 }

@@ -22,12 +22,15 @@ databaseChangeLog:
               - column:
                   name: card_number
                   type: varchar(255)
+                  constraints:
+                    nullable: false
+                    unique: true
               - column:
                   name: card_holder
                   type: varchar(255)
               - column:
                   name: expiration_date
-                  type: varchar(255)
+                  type: date
               - column:
                   name: cvv
                   type: varchar(4)
