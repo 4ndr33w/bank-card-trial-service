@@ -39,7 +39,7 @@ public class User {
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private UUID id;
 	@Version
-	private Integer version;
+	private Integer version = 0;
 	private String name;
 	private String lastName;
 	@Column(nullable = false, unique = true)

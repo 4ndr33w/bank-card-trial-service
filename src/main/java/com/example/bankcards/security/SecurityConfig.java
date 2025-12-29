@@ -50,6 +50,7 @@ public class SecurityConfig {
 						.requestMatchers(HttpMethod.POST, "/api/v1/login").permitAll()
 						.requestMatchers("/swagger-ui/**").permitAll()
 						.requestMatchers("/api/v1/admin/**").hasAuthority(UserRole.ADMIN.getAuthority())
+						.requestMatchers("/api/v1/cards/**").hasAuthority(UserRole.ADMIN.getAuthority())
 						.anyRequest().authenticated())
 				.addFilterBefore(loginAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
 				.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)

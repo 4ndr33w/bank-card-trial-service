@@ -37,7 +37,7 @@ public class AdminServiceImpl implements AdminService {
 		try {
 			User existingUser = userRepository.findById(id).orElseThrow(
 					() -> new UserNotFoundException("Не найден пользователь с id: %s".formatted(id.toString())));
-			userRepository.deleteById(id);
+			userRepository.delete(existingUser);
 			return true;
 		}
 		catch (Exception e) {
@@ -109,6 +109,6 @@ public class AdminServiceImpl implements AdminService {
 			existingUser.getRoles().remove(existingRole);
 			return true;
 		}
-		throw new UserRoleException("УпПользователя с id: %s отсутствует роль %s".formatted(id, role.getValue()));
+		throw new UserRoleException("У пользователя с id: %s отсутствует роль %s".formatted(id, role.getValue()));
 	}
 }

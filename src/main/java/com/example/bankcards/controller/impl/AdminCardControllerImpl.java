@@ -1,6 +1,6 @@
 package com.example.bankcards.controller.impl;
 
-import com.example.bankcards.controller.CardAdminController;
+import com.example.bankcards.controller.AdminCardController;
 import com.example.bankcards.dto.request.CardRequestDto;
 import com.example.bankcards.dto.response.CardPageViewResponseDto;
 import com.example.bankcards.dto.response.CardResponseDto;
@@ -18,7 +18,7 @@ import java.util.UUID;
  */
 @RestController
 @RequiredArgsConstructor
-public class CardAdminControllerImpl implements CardAdminController {
+public class AdminCardControllerImpl implements AdminCardController {
 	
 	private final AdminCardService cardService;
 	

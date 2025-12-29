@@ -19,7 +19,7 @@ public class AuthenticationControllerImpl implements AuthenticationController {
 	private final AuthenticationService authenticationService;
 	
 	@Override
-	public ResponseEntity<AuthenticationResponseDto> updateById(String refreshToken) {
+	public ResponseEntity<AuthenticationResponseDto> refresh(String refreshToken) {
 		return ResponseEntity.status(HttpStatus.OK).body(authenticationService.refreshAccessToken(refreshToken));
 	}
 }

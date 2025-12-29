@@ -2,6 +2,7 @@ package com.example.bankcards.dto.mapper.decorator;
 
 import com.example.bankcards.dto.mapper.CardMapper;
 import com.example.bankcards.dto.request.CardRequestDto;
+import com.example.bankcards.dto.response.UserResponseDto;
 import com.example.bankcards.entity.Card;
 import com.example.bankcards.enums.CardStatus;
 import com.example.bankcards.service.impl.UtilService;
@@ -31,8 +32,8 @@ public abstract class CardMapperDecorator implements CardMapper {
 	private UtilService utilService;
 	
 	@Override
-	public Card mapRequestToEntity(CardRequestDto request) {
-		Card card = delegate.mapRequestToEntity(request);
+	public Card mapRequestToEntity(CardRequestDto request, UserResponseDto user) {
+		Card card = delegate.mapRequestToEntity(request, null);
 		card.setClientId(request.clientId());
 		card.setBalance(BigDecimal.ZERO);
 		card.setStatus(CardStatus.ACTIVE);
@@ -40,7 +41,7 @@ public abstract class CardMapperDecorator implements CardMapper {
 		card.setCardNumber(utilService.generateCardNumber());
 		card.setCvv(utilService.generateCvv());
 		
-		String cardHolder = utilService.getUserFromSecurityContext().getName() + " " + utilService.getUserFromSecurityContext().getLastName();
+		String cardHolder = user.name() + " " + user.lastName();
 		card.setCardHolder(cardHolder);
 		
 		return card;

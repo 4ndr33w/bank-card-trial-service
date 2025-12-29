@@ -32,7 +32,7 @@ public class Card {
 	@GeneratedValue(strategy = GenerationType.UUID)
 	private UUID id;
 	@Version
-	private Integer version;
+	private Integer version = 0;
 	private UUID clientId;
 	private String cardNumber;
 	private String cardHolder;

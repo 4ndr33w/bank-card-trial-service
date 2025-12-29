@@ -5,6 +5,7 @@ import com.example.bankcards.dto.projection.CardBalanceProjection;
 import com.example.bankcards.dto.request.CardRequestDto;
 import com.example.bankcards.dto.response.CardBalanceResponseDto;
 import com.example.bankcards.dto.response.CardResponseDto;
+import com.example.bankcards.dto.response.UserResponseDto;
 import com.example.bankcards.entity.Card;
 import org.mapstruct.DecoratedWith;
 import org.mapstruct.Mapper;
@@ -25,7 +26,8 @@ import org.mapstruct.ReportingPolicy;
 public interface CardMapper {
 	
 	@Mapping(target = "id", ignore = true)
-	Card mapRequestToEntity(CardRequestDto request);
+	@Mapping(target = "clientId", ignore = true, source = "request.clientId")
+	Card mapRequestToEntity(CardRequestDto request, UserResponseDto user);
 	
 	CardResponseDto mapEntityToResponse(Card entity);
 	
