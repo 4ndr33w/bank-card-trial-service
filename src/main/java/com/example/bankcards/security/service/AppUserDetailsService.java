@@ -17,7 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 @RequiredArgsConstructor
-public class AppUserDetailsServiceImpl implements UserDetailsService {
+public class AppUserDetailsService implements UserDetailsService {
 	
 	private final UserRepository userRepository;
 	
@@ -29,7 +29,7 @@ public class AppUserDetailsServiceImpl implements UserDetailsService {
 	 * </ul>
 	 * @param login поле, идентифицирующее пользователя, чьи данные запрашиваются.
 	 * @return объект, реализующий {@code UserDetails}, содержащий данные профиля пользователя
-	 * @throws com.example.bankcards.exception.businessException.UserNotFoundException при неудачной попытке найти пользователя по {@code email} или {@code userName}
+	 * @throws UserNotFoundException при неудачной попытке найти пользователя по {@code email} или {@code userName}
 	 */
 	@Override
 	@Transactional(readOnly = true)

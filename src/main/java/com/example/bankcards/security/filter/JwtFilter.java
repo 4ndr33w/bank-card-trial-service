@@ -7,7 +7,6 @@ import com.example.bankcards.exception.handler.SecurityExceptionHandler;
 import com.example.bankcards.security.component.JwtTokenProvider;
 import com.example.bankcards.util.constant.Constants;
 import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;

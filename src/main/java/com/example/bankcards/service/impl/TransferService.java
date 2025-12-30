@@ -28,6 +28,9 @@ public class TransferService {
 		if(cardFromBalance.compareTo(amount) < 0) {
 			throw new CardBalanceException("Недостаточно средств для выполнения операции перевода");
 		}
+		if(cardFrom.equals(cardTo)) {
+			return  true;
+		}
 		
 		cardFrom.setBalance(cardFromBalance.subtract(amount));
 		cardTo.setBalance(cardToBalance.add(amount));

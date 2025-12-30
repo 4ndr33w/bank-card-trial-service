@@ -34,15 +34,10 @@ public class AdminServiceImpl implements AdminService {
 	@Override
 	@Transactional
 	public boolean deleteByClientId(@NonNull UUID id) {
-		try {
-			User existingUser = userRepository.findById(id).orElseThrow(
-					() -> new UserNotFoundException("Не найден пользователь с id: %s".formatted(id.toString())));
-			userRepository.delete(existingUser);
-			return true;
-		}
-		catch (Exception e) {
-			throw new RuntimeException("Ошибка при удалении пользователя с id: %s".formatted(id), e);
-		}
+		User existingUser = userRepository.findById(id).orElseThrow(
+				() -> new UserNotFoundException("Не найден пользователь с id: %s".formatted(id.toString())));
+		userRepository.delete(existingUser);
+		return true;
 	}
 	
 	@Override
@@ -89,7 +84,7 @@ public class AdminServiceImpl implements AdminService {
 				() -> new RoleNotFoundException("Роль %s не найдена".formatted(role.getValue())));
 		User existingUser = userRepository.findById(clientId).orElseThrow(
 				() -> new UserNotFoundException("Не найден пользователь с clientId: %s".formatted(clientId.toString())));
-		if(!existingUser.getRoles().contains(existingRole)) {
+		if(!existingUser.getRoles().stream().anyMatch(x -> x.getRole().equals(role.getValue()))) {
 			existingUser.getRoles().add(existingRole);
 			return true;
 		}
@@ -105,7 +100,7 @@ public class AdminServiceImpl implements AdminService {
 		User existingUser = userRepository.findById(id)
 				.orElseThrow(
 				() -> new UserNotFoundException("Не найден пользователь с id: %s".formatted(id.toString())));
-		if(existingUser.getRoles().contains(existingRole)) {
+		if(existingUser.getRoles().stream().anyMatch(x -> x.getRole().equals(role.getValue()))) {
 			existingUser.getRoles().remove(existingRole);
 			return true;
 		}

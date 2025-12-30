@@ -26,7 +26,15 @@ public class OpenApiConfig {
 				.in(SecurityScheme.In.HEADER)
 				.description("Bearer Token");
 		
+		SecurityScheme basicSchema = new SecurityScheme()
+				.type(SecurityScheme.Type.HTTP)
+				.scheme("basic")
+				.name("Authorization")
+				.in(SecurityScheme.In.HEADER)
+				.description("Basic Authentication. Формат: Basic {base64(логин:пароль)}");
+		
 		SecurityRequirement securityRequirement = new SecurityRequirement().addList("bearer");
+		SecurityRequirement basicRequirement = new SecurityRequirement().addList("basic");
 		
 		return new OpenAPI()
 				.info(new Info()
@@ -37,7 +45,9 @@ public class OpenApiConfig {
 						.version("1.0")
 						.description("Сервис упраленния пользователями и пользовательскими продуктами (картами)"))
 				.components(new Components()
-						.addSecuritySchemes("bearer", jwtSchema))
-				.addSecurityItem(securityRequirement);
+						.addSecuritySchemes("bearer", jwtSchema)
+						.addSecuritySchemes("basic", basicSchema))
+				.addSecurityItem(securityRequirement)
+				.addSecurityItem(basicRequirement);
 	}
 }

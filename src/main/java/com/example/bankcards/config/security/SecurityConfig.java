@@ -1,4 +1,4 @@
-package com.example.bankcards.security;
+package com.example.bankcards.config.security;
 
 import com.example.bankcards.enums.UserRole;
 import com.example.bankcards.exception.handler.SecurityExceptionHandler;
@@ -28,6 +28,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @RequiredArgsConstructor
 public class SecurityConfig {
 	
+	private final CorsConfig corsConfig;
+	
 	@Bean
 	public SecurityFilterChain filterChain(
 			HttpSecurity http,
@@ -36,7 +38,7 @@ public class SecurityConfig {
 			LoginAuthenticationFilter loginAuthenticationFilter) throws Exception {
 		
 		return http
-				.cors(AbstractHttpConfigurer::disable)
+				.cors(cors -> cors.configurationSource(corsConfig.corsConfigurationSource()))
 				.csrf(AbstractHttpConfigurer::disable)
 				.httpBasic(AbstractHttpConfigurer::disable)
 				.formLogin(AbstractHttpConfigurer::disable)
@@ -48,6 +50,7 @@ public class SecurityConfig {
 						.requestMatchers(HttpMethod.POST, "/api/v1/users").permitAll()
 						.requestMatchers(HttpMethod.POST, "/api/v1/auth/refresh").permitAll()
 						.requestMatchers(HttpMethod.POST, "/api/v1/login").permitAll()
+						.requestMatchers(HttpMethod.GET, "/docs/**").permitAll()
 						.requestMatchers("/swagger-ui/**").permitAll()
 						.requestMatchers("/api/v1/admin/**").hasAuthority(UserRole.ADMIN.getAuthority())
 						.requestMatchers("/api/v1/cards/**").hasAuthority(UserRole.ADMIN.getAuthority())

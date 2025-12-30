@@ -1,4 +1,4 @@
-package com.example.bankcards.security;
+package com.example.bankcards.config.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

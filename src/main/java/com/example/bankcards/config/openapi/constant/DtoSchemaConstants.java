@@ -14,9 +14,7 @@ public final class DtoSchemaConstants {
 	public static final String USERNAME_EXAMPLE = "pup0ck";
 	public static final String PASSWORD_EXAMPLE = "qwErty!23@";
 	public static final String BIRTH_DATE_EXAMPLE = "25.10.2000";
-	public static final String PHONE_EXAMPLE = "+7-123-456-78-90";
 	public static final String ID_EXAMPLE = "eca916f3-8596-4265-b207-f589e09cb8f6";
-	public static final String HAS_IMAGE_EXAMPLE = "Вася";
 	public static final String IS_BLOCKED_EXAMPLE = "Вася";
 	public static final String IS_ACTIVE_EXAMPLE = "Вася";
 	public static final String EXCEPTION_HTTP_STATUS_EXAMPLE = "500";
@@ -34,9 +32,7 @@ public final class DtoSchemaConstants {
 	public static final String USERNAME_DESCRIPTION = "Логин пользователя";
 	public static final String PASSWORD_DESCRIPTION = "Пароль пользователя";
 	public static final String BIRTH_DATE_DESCRIPTION = "Дата рождения пользователя";
-	public static final String PHONE_DESCRIPTION = "Номер телефона пользователя";
 	public static final String ID_DESCRIPTION = "Уникальный идентификатор пользователя";
-	public static final String HAS_IMAGE_DESCRIPTION = "Флаг наличия у пользователя изображения";
 	public static final String IS_BLOCKED_DESCRIPTION = "Флаг блокировки профиля пользователя";
 	public static final String IS_ACTIVE_DESCRIPTION = "Флаг активности профиля пользователя";
 	public static final String EXCEPTION_HTTP_STATUS_DESCRIPTION = "Статус ответа";

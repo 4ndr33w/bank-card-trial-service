@@ -13,6 +13,7 @@ import com.example.bankcards.exception.businessException.UserNotFoundException;
 import com.example.bankcards.repository.CardRepository;
 import com.example.bankcards.service.impl.AdminCardServiceImpl;
 import com.example.bankcards.service.impl.UtilService;
+import com.example.bankcards.utils.TestUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,7 +29,6 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -52,61 +52,33 @@ public class AdminCardServiceTests {
 	
 	@Mock
 	private UserService userService;
-	
 	@Mock
 	private CardRepository cardRepository;
-	
 	@Mock
 	private UtilService utilService;
-	
 	@Mock
 	private CardMapper cardMapper;
-	
 	@InjectMocks
 	private AdminCardServiceImpl adminCardService;
 	
 	@Test
 	@DisplayName("Создание карты - успешный сценарий")
 	void createCard_ShouldCreateCard_WhenUserExists() {
-		// Arrange
-		UUID userId = UUID.randomUUID();
-		UUID cardId = UUID.randomUUID();
-		
-		CardRequestDto cardRequestDto = new CardRequestDto(userId);
-		
-		UserResponseDto userResponseDto = new UserResponseDto(
-				userId, "John", "Doe", "john@example.com",
-				"johndoe", null, true, false, Set.of()
-		);
-		
-		Card newCard = Card.builder()
-				.id(cardId)
-				.clientId(userId)
-				//.cardType(CardType.CREDIT)
-				.status(CardStatus.ACTIVE)
-				.build();
-		
-		Card savedCard = Card.builder()
-				.id(cardId)
-				.clientId(userId)
-				//.cardType(CardType.CREDIT)
-				.status(CardStatus.ACTIVE)
-				.build();
-		
-		CardResponseDto expectedResponse = new CardResponseDto(
-				cardId, userId, "1234 5678 9012 3456", "Вася Пупкин",
-				String.valueOf(LocalDate.of(2030, 1, 1)), CardStatus.ACTIVE, BigDecimal.ZERO
-		);
+		CardRequestDto cardRequestDto = TestUtils.testCardRequestDto();
+		UserResponseDto userResponseDto = TestUtils.testUserResponseDto();
+		Card newCard = TestUtils.testNewUserCard;
+		Card savedCard = TestUtils.testNewSavedCard;
+		CardResponseDto expectedResponse = TestUtils.testCardResponseDto;
+		UUID userId = userResponseDto.id();
+		UUID cardId = savedCard.getId();
 		
 		when(userService.findById(userId)).thenReturn(userResponseDto);
 		when(cardMapper.mapRequestToEntity(cardRequestDto, userResponseDto)).thenReturn(newCard);
 		when(cardRepository.save(newCard)).thenReturn(savedCard);
 		when(cardMapper.mapEntityToResponse(savedCard)).thenReturn(expectedResponse);
-		
-		// Act
+
 		CardResponseDto result = adminCardService.createCard(cardRequestDto);
-		
-		// Assert
+
 		assertNotNull(result);
 		assertEquals(cardId, result.id());
 		
@@ -119,13 +91,12 @@ public class AdminCardServiceTests {
 	@Test
 	@DisplayName("Создание карты - выбрасывает исключение когда пользователь не найден")
 	void createCard_ShouldThrowException_WhenUserNotFound() {
-		// Arrange
-		UUID userId = UUID.randomUUID();
-		CardRequestDto cardRequestDto = new CardRequestDto(userId);
+		CardRequestDto cardRequestDto = TestUtils.testCardRequestDto();
+		UserResponseDto userResponseDto = TestUtils.testUserResponseDto();
+		UUID userId = userResponseDto.id();
 		
 		when(userService.findById(userId)).thenThrow(new UserNotFoundException("Пользователь не найден"));
-		
-		// Act & Assert
+
 		assertThrows(UserNotFoundException.class, () -> adminCardService.createCard(cardRequestDto));
 		
 		verify(userService).findById(userId);
@@ -136,83 +107,51 @@ public class AdminCardServiceTests {
 	@Test
 	@DisplayName("Блокировка карты - успешный сценарий")
 	void blockCard_ShouldBlockCard_WhenCardExistsAndNotBlocked() {
-		// Arrange
-		UUID cardId = UUID.randomUUID();
-		UUID userId = UUID.randomUUID();
-		
-		Card card = Card.builder()
-				.id(cardId)
-				.clientId(userId)
-				.status(CardStatus.ACTIVE)
-				.build();
+		Card card = TestUtils.testNewSavedCard;
+		UUID cardId = card.getId();
 		
 		when(cardRepository.findById(cardId)).thenReturn(Optional.of(card));
-		
-		// Act
+
 		boolean result = adminCardService.blockCard(cardId);
-		
-		// Assert
+
 		assertTrue(result);
 		assertEquals(CardStatus.BLOCKED, card.getStatus());
 		
 		verify(cardRepository).findById(cardId);
-		verify(cardRepository, never()).save(card); // Не сохраняем, так как @Transactional
+		verify(cardRepository, never()).save(card);
 	}
 	
 	@Test
 	@DisplayName("Блокировка карты - выбрасывает исключение когда карта не найдена")
 	void blockCard_ShouldThrowCardNotFoundException_WhenCardNotFound() {
-		// Arrange
-		UUID cardId = UUID.randomUUID();
+		UUID cardId = TestUtils.testNewSavedCard.getId();
 		
 		when(cardRepository.findById(cardId)).thenReturn(Optional.empty());
-		
-		// Act & Assert
 		assertThrows(CardNotFoundException.class, () -> adminCardService.blockCard(cardId));
-		
 		verify(cardRepository).findById(cardId);
 	}
 	
 	@Test
 	@DisplayName("Блокировка карты - выбрасывает исключение когда карта уже заблокирована")
 	void blockCard_ShouldThrowCardActivationException_WhenCardAlreadyBlocked() {
-		// Arrange
-		UUID cardId = UUID.randomUUID();
-		UUID userId = UUID.randomUUID();
-		
-		Card card = Card.builder()
-				.id(cardId)
-				.clientId(userId)
-				.status(CardStatus.BLOCKED)
-				.build();
+		UUID cardId = TestUtils.testNewSavedCard.getId();
+		Card card = TestUtils.testBlockedCard;
 		
 		when(cardRepository.findById(cardId)).thenReturn(Optional.of(card));
-		
-		// Act & Assert
 		assertThrows(CardActivationException.class, () -> adminCardService.blockCard(cardId));
-		
 		verify(cardRepository).findById(cardId);
 	}
 	
 	@Test
 	@DisplayName("Активация карты - успешный сценарий")
 	void activateCard_ShouldActivateCard_WhenCardExistsAndNotActive() {
-		// Arrange
-		UUID cardId = UUID.randomUUID();
-		UUID userId = UUID.randomUUID();
-		
-		Card card = Card.builder()
-				.id(cardId)
-				.clientId(userId)
-				.status(CardStatus.BLOCKED)
-				.build();
+		Card card = TestUtils.testNewSavedCard;
+		UUID cardId = TestUtils.testNewSavedCard.getId();
 		
 		when(cardRepository.findById(cardId)).thenReturn(Optional.of(card));
-		
-		// Act
+
 		boolean result = adminCardService.activateCard(cardId);
-		
-		// Assert
+
 		assertTrue(result);
 		assertEquals(CardStatus.ACTIVE, card.getStatus());
 		
@@ -222,43 +161,24 @@ public class AdminCardServiceTests {
 	@Test
 	@DisplayName("Активация карты - выбрасывает исключение когда карта уже активна")
 	void activateCard_ShouldThrowCardActivationException_WhenCardAlreadyActive() {
-		// Arrange
-		UUID cardId = UUID.randomUUID();
-		UUID userId = UUID.randomUUID();
-		
-		Card card = Card.builder()
-				.id(cardId)
-				.clientId(userId)
-				.status(CardStatus.ACTIVE)
-				.build();
+		Card card = TestUtils.testNewSavedCard;
+		UUID cardId = TestUtils.testNewSavedCard.getId();
 		
 		when(cardRepository.findById(cardId)).thenReturn(Optional.of(card));
-		
-		// Act & Assert
 		assertThrows(CardActivationException.class, () -> adminCardService.activateCard(cardId));
-		
 		verify(cardRepository).findById(cardId);
 	}
 	
 	@Test
 	@DisplayName("Удаление карты - успешный сценарий")
 	void deleteCard_ShouldDeleteCard_WhenCardExists() {
-		// Arrange
-		UUID cardId = UUID.randomUUID();
-		UUID userId = UUID.randomUUID();
-		
-		Card card = Card.builder()
-				.id(cardId)
-				.clientId(userId)
-				.status(CardStatus.ACTIVE)
-				.build();
+		Card card = TestUtils.testNewSavedCard;
+		UUID cardId = TestUtils.testNewSavedCard.getId();
 		
 		when(cardRepository.findById(cardId)).thenReturn(Optional.of(card));
-		
-		// Act
+
 		adminCardService.deleteCard(cardId);
-		
-		// Assert
+
 		verify(cardRepository).findById(cardId);
 		verify(cardRepository).delete(card);
 	}
@@ -266,12 +186,10 @@ public class AdminCardServiceTests {
 	@Test
 	@DisplayName("Удаление карты - выбрасывает исключение когда карта не найдена")
 	void deleteCard_ShouldThrowCardNotFoundException_WhenCardNotFound() {
-		// Arrange
 		UUID cardId = UUID.randomUUID();
 		
 		when(cardRepository.findById(cardId)).thenReturn(Optional.empty());
-		
-		// Act & Assert
+
 		assertThrows(CardNotFoundException.class, () -> adminCardService.deleteCard(cardId));
 		
 		verify(cardRepository).findById(cardId);
@@ -281,7 +199,6 @@ public class AdminCardServiceTests {
 	@Test
 	@DisplayName("Получение всех карт с пагинацией - успешный сценарий")
 	void getAllCardsByPage_ShouldReturnPaginatedCards() {
-		// Arrange
 		Integer page = 1;
 		Integer limit = 10;
 		int pageLimit = 10;
@@ -327,11 +244,9 @@ public class AdminCardServiceTests {
 		when(cardRepository.count()).thenReturn(2L);
 		when(cardMapper.mapEntityToResponse(card1)).thenReturn(cardResponse1);
 		when(cardMapper.mapEntityToResponse(card2)).thenReturn(cardResponse2);
-		
-		// Act
+
 		CardPageViewResponseDto result = adminCardService.getAllCardsByPage(page, limit);
-		
-		// Assert
+
 		assertNotNull(result);
 		assertEquals(expectedResponse.currentPage(), result.currentPage());
 		assertEquals(expectedResponse.limit(), result.limit());
@@ -347,17 +262,12 @@ public class AdminCardServiceTests {
 	@Test
 	@DisplayName("Получение всех карт с пагинацией - некорректные параметры")
 	void getAllCardsByPage_ShouldUseDefaultValues_WhenParametersInvalid() {
-		// Arrange
 		Integer page = null;
 		Integer limit = null;
-		int pageLimit = 5; // default from utilService
+		int pageLimit = 5;
 		int paginationPage = 0;
 		
-		Card card = Card.builder()
-				.id(UUID.randomUUID())
-				.clientId(UUID.randomUUID())
-				.status(CardStatus.ACTIVE)
-				.build();
+		Card card = TestUtils.testNewSavedCard;
 		
 		List<Card> cards = List.of(card);
 		Page<Card> cardsPage = new PageImpl<>(cards, PageRequest.of(paginationPage, pageLimit), 1);
@@ -371,13 +281,11 @@ public class AdminCardServiceTests {
 		when(cardRepository.findAll(any(Pageable.class))).thenReturn(cardsPage);
 		when(cardRepository.count()).thenReturn(1L);
 		when(cardMapper.mapEntityToResponse(card)).thenReturn(cardResponse);
-		
-		// Act
+	
 		CardPageViewResponseDto result = adminCardService.getAllCardsByPage(page, limit);
-		
-		// Assert
+
 		assertNotNull(result);
-		assertEquals(1, result.currentPage()); // paginationPage + 1
+		assertEquals(1, result.currentPage());
 		assertEquals(pageLimit, result.limit());
 		
 		verify(utilService).setPageLimit(limit);
@@ -431,11 +339,9 @@ public class AdminCardServiceTests {
 		when(cardRepository.count()).thenReturn(2L);
 		when(cardMapper.mapEntityToResponse(card1)).thenReturn(cardResponse1);
 		when(cardMapper.mapEntityToResponse(card2)).thenReturn(cardResponse2);
-		
-		// Act
+
 		CardPageViewResponseDto result = adminCardService.getAllCardsByClientId(clientId, page);
-		
-		// Assert
+
 		assertNotNull(result);
 		assertEquals(expectedResponse.currentPage(), result.currentPage());
 		assertEquals(expectedResponse.limit(), result.limit());
@@ -453,9 +359,8 @@ public class AdminCardServiceTests {
 	}
 	
 	@Test
-	@DisplayName("Получение всех карт клиента - пустой результат")
+	@DisplayName("Получение всех карт клиента - пустой список при отсутствии карт")
 	void getAllCardsByClientId_ShouldReturnEmpty_WhenClientHasNoCards() {
-		// Arrange
 		UUID clientId = UUID.randomUUID();
 		Integer page = 1;
 		int pageLimit = 20;
@@ -466,15 +371,13 @@ public class AdminCardServiceTests {
 		
 		when(cardRepository.findAllByClientId(eq(clientId), any(Pageable.class))).thenReturn(cardsPage);
 		when(cardRepository.count()).thenReturn(0L);
-		
-		// Act
+
 		CardPageViewResponseDto result = adminCardService.getAllCardsByClientId(clientId, page);
-		
-		// Assert
+
 		assertNotNull(result);
 		assertEquals(1, result.currentPage());
 		assertEquals(pageLimit, result.limit());
-		assertEquals(1, result.totalPages()); // 0 / 20 + 1 = 1
+		assertEquals(1, result.totalPages());
 		assertEquals(0, result.totalCards());
 		assertTrue(result.cards().isEmpty());
 		
@@ -486,36 +389,26 @@ public class AdminCardServiceTests {
 	@Test
 	@DisplayName("Получение всех карт клиента - некорректная страница")
 	void getAllCardsByClientId_ShouldHandleInvalidPage() {
-		// Arrange
 		UUID clientId = UUID.randomUUID();
 		Integer page = -1;
 		int pageLimit = 20;
-		int paginationPage = 0; // (page < 1) ? 1 : (page - 1) -> 1 - 1 = 0
+		int paginationPage = 0;
 		
-		Card card = Card.builder()
-				.id(UUID.randomUUID())
-				.clientId(clientId)
-				.status(CardStatus.ACTIVE)
-				.build();
+		Card card = TestUtils.testNewSavedCard;
 		
 		List<Card> cards = List.of(card);
 		Page<Card> cardsPage = new PageImpl<>(cards, PageRequest.of(paginationPage, pageLimit), 1);
 
-		CardResponseDto cardResponse = new CardResponseDto(
-				UUID.randomUUID(), clientId, "1234 5678 9012 3457", "Вася Пупкин",
-				String.valueOf(LocalDate.of(2030, 1, 1)), CardStatus.ACTIVE, BigDecimal.ZERO
-		);
+		CardResponseDto cardResponse = TestUtils.testCardResponseDto;
 		
 		when(cardRepository.findAllByClientId(eq(clientId), any(Pageable.class))).thenReturn(cardsPage);
 		when(cardRepository.count()).thenReturn(1L);
 		when(cardMapper.mapEntityToResponse(card)).thenReturn(cardResponse);
-		
-		// Act
+
 		CardPageViewResponseDto result = adminCardService.getAllCardsByClientId(clientId, page);
-		
-		// Assert
+
 		assertNotNull(result);
-		assertEquals(1, result.currentPage()); // paginationPage + 1 = 0 + 1 = 1
+		assertEquals(1, result.currentPage());
 		assertEquals(pageLimit, result.limit());
 		
 		verify(cardRepository).findAllByClientId(eq(clientId), argThat(pageable ->
@@ -526,11 +419,10 @@ public class AdminCardServiceTests {
 	@Test
 	@DisplayName("Получение всех карт с пагинацией - расчет количества страниц")
 	void getAllCardsByPage_ShouldCalculateTotalPagesCorrectly() {
-		// Arrange
 		Integer page = 3;
 		Integer limit = 5;
 		int pageLimit = 5;
-		int paginationPage = 2; // page - 1
+		int paginationPage = 2;
 		
 		List<Card> cards = List.of(
 				Card.builder().id(UUID.randomUUID()).clientId(UUID.randomUUID()).build(),
@@ -549,15 +441,13 @@ public class AdminCardServiceTests {
 		when(cardRepository.findAll(any(Pageable.class))).thenReturn(cardsPage);
 		when(cardRepository.count()).thenReturn(23L);
 		when(cardMapper.mapEntityToResponse(any(Card.class))).thenReturn(cardResponse);
-		
-		// Act
+
 		CardPageViewResponseDto result = adminCardService.getAllCardsByPage(page, limit);
-		
-		// Assert
+
 		assertNotNull(result);
-		assertEquals(3, result.currentPage()); // paginationPage + 1 = 2 + 1 = 3
+		assertEquals(3, result.currentPage());
 		assertEquals(pageLimit, result.limit());
-		// totalPages = (23 / 5) + 1 = 4 + 1 = 5
+
 		assertEquals(5, result.totalPages());
 		assertEquals(23, result.totalCards());
 	}
