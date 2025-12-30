@@ -59,7 +59,10 @@ public class ClientCardServiceImpl implements ClientCardService {
 			
 			long totalCards = cardRepository.count();
 			long totalPages = (totalCards / pageLimit) + 1;
-			List<CardResponseDto> cardResponseDtoList = cardsPage.stream().map(cardMapper::mapEntityToResponse).toList();
+			List<CardResponseDto> cardResponseDtoList = cardsPage.stream()
+					.map(cardMapper::mapEntityToResponse)
+					.map(utilService::maskCardNumber)
+					.toList();
 			
 			return new CardPageViewResponseDto(paginationPage + 1, pageLimit, totalPages, totalCards, cardResponseDtoList);
 		}
@@ -71,8 +74,9 @@ public class ClientCardServiceImpl implements ClientCardService {
 				Card existingClientCard = cardRepository.findCardByIdAndClientId(cardId, userId)
 								.orElseThrow(
 										() -> new CardNotFoundException("Не найдена карта с id: %s у пользователя с id: %s".formatted(cardId, userId)));
+				CardResponseDto cardResponseDto = cardMapper.mapEntityToResponse(existingClientCard);
 				
-				return cardMapper.mapEntityToResponse(existingClientCard);
+				return utilService.maskCardNumber(cardResponseDto);
 		}
 
 		@Override

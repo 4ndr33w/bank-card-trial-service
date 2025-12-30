@@ -10,8 +10,6 @@ import java.util.UUID;
  * @version 1.0
  */
 public record CardResponseDto(
-		UUID id,
-		UUID clientId,
 		String cardNumber,
 		String cardHolder,
 		String expirationDate,

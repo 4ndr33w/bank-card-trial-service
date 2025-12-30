@@ -76,16 +76,18 @@ public class AdminCardServiceTests {
 		when(cardMapper.mapRequestToEntity(cardRequestDto, userResponseDto)).thenReturn(newCard);
 		when(cardRepository.save(newCard)).thenReturn(savedCard);
 		when(cardMapper.mapEntityToResponse(savedCard)).thenReturn(expectedResponse);
+		when(utilService.maskCardNumber(expectedResponse)).thenReturn(expectedResponse);
 
 		CardResponseDto result = adminCardService.createCard(cardRequestDto);
 
 		assertNotNull(result);
-		assertEquals(cardId, result.id());
+		assertEquals(savedCard.getCardHolder(), result.cardHolder());
 		
 		verify(userService).findById(userId);
 		verify(cardMapper).mapRequestToEntity(cardRequestDto, userResponseDto);
 		verify(cardRepository).save(newCard);
 		verify(cardMapper).mapEntityToResponse(savedCard);
+		verify(utilService).maskCardNumber(expectedResponse);
 	}
 	
 	@Test
@@ -224,12 +226,12 @@ public class AdminCardServiceTests {
 		Page<Card> cardsPage = new PageImpl<>(cards, PageRequest.of(paginationPage, pageLimit), 2);
 		
 		CardResponseDto cardResponse1 = new CardResponseDto(
-				cardId1, userId, "1234 5678 9012 3456", "Вася Пупкин",
+				"**** **** **** 3456", "Вася Пупкин",
 				String.valueOf(LocalDate.of(2030, 1, 1)), CardStatus.ACTIVE, BigDecimal.ZERO
 		);
 		
 		CardResponseDto cardResponse2 = new CardResponseDto(
-				cardId2, userId, "1234 5678 9012 3457", "Вася Пупкин",
+				"**** **** **** 3457", "Вася Пупкин",
 				String.valueOf(LocalDate.of(2030, 1, 1)), CardStatus.ACTIVE, BigDecimal.ZERO
 		);
 		
@@ -273,7 +275,7 @@ public class AdminCardServiceTests {
 		Page<Card> cardsPage = new PageImpl<>(cards, PageRequest.of(paginationPage, pageLimit), 1);
 
 		CardResponseDto cardResponse = new CardResponseDto(
-				UUID.randomUUID(), UUID.randomUUID(), "1234 5678 9012 3457", "Вася Пупкин",
+				"**** **** **** 3457", "Вася Пупкин",
 				String.valueOf(LocalDate.of(2030, 1, 1)), CardStatus.ACTIVE, BigDecimal.ZERO
 		);
 		
@@ -295,7 +297,6 @@ public class AdminCardServiceTests {
 	@Test
 	@DisplayName("Получение всех карт клиента - успешный сценарий")
 	void getAllCardsByClientId_ShouldReturnClientCards() {
-		// Arrange
 		UUID clientId = UUID.randomUUID();
 		Integer page = 1;
 		int pageLimit = 20;
@@ -308,24 +309,26 @@ public class AdminCardServiceTests {
 				.id(cardId1)
 				.clientId(clientId)
 				.status(CardStatus.ACTIVE)
+				.cardHolder("Вася Пупкин")
 				.build();
 		
 		Card card2 = Card.builder()
 				.id(cardId2)
 				.clientId(clientId)
 				.status(CardStatus.BLOCKED)
+				.cardHolder("Вася Пупкин")
 				.build();
 		
 		List<Card> cards = List.of(card1, card2);
 		Page<Card> cardsPage = new PageImpl<>(cards, PageRequest.of(paginationPage, pageLimit), 2);
 		
 		CardResponseDto cardResponse1 = new CardResponseDto(
-				cardId1, clientId, "1234 5678 9012 3456", "Вася Пупкин",
+				"**** **** **** 3456", "Вася Пупкин",
 				String.valueOf(LocalDate.of(2030, 1, 1)), CardStatus.ACTIVE, BigDecimal.ZERO
 		);
 		
 		CardResponseDto cardResponse2 = new CardResponseDto(
-				cardId2, clientId, "1234 5678 9012 3457", "Вася Пупкин",
+				"**** **** **** 3457", "Вася Пупкин",
 				String.valueOf(LocalDate.of(2030, 1, 1)), CardStatus.ACTIVE, BigDecimal.ZERO
 		);
 		
@@ -339,6 +342,8 @@ public class AdminCardServiceTests {
 		when(cardRepository.count()).thenReturn(2L);
 		when(cardMapper.mapEntityToResponse(card1)).thenReturn(cardResponse1);
 		when(cardMapper.mapEntityToResponse(card2)).thenReturn(cardResponse2);
+		when(utilService.maskCardNumber(cardResponse1)).thenReturn(cardResponse1);
+		when(utilService.maskCardNumber(cardResponse2)).thenReturn(cardResponse2);
 
 		CardPageViewResponseDto result = adminCardService.getAllCardsByClientId(clientId, page);
 
@@ -348,14 +353,15 @@ public class AdminCardServiceTests {
 		assertEquals(expectedResponse.totalPages(), result.totalPages());
 		assertEquals(expectedResponse.totalCards(), result.totalCards());
 		assertEquals(expectedResponse.cards().size(), result.cards().size());
-		assertEquals(clientId, result.cards().get(0).clientId());
-		assertEquals(clientId, result.cards().get(1).clientId());
+		assertEquals(cardResponse1.cardHolder(), result.cards().get(0).cardHolder());
+		assertEquals(cardResponse2.cardHolder(), result.cards().get(1).cardHolder());
 		
 		verify(cardRepository).findAllByClientId(eq(clientId), argThat(pageable ->
 				pageable.getPageNumber() == paginationPage && pageable.getPageSize() == pageLimit
 		));
 		verify(cardRepository).count();
 		verify(cardMapper, times(2)).mapEntityToResponse(any(Card.class));
+		verify(utilService, times(2)).maskCardNumber(any(CardResponseDto.class));
 	}
 	
 	@Test
@@ -433,7 +439,7 @@ public class AdminCardServiceTests {
 		Page<Card> cardsPage = new PageImpl<>(cards, PageRequest.of(paginationPage, pageLimit), 23);
 		
 		CardResponseDto cardResponse = new CardResponseDto(
-				UUID.randomUUID(), UUID.randomUUID(), "1234 5678 9012 3457", "Вася Пупкин",
+				"**** **** **** 3457", "Вася Пупкин",
 				String.valueOf(LocalDate.of(2030, 1, 1)), CardStatus.ACTIVE, BigDecimal.ZERO
 		);
 		

@@ -169,23 +169,24 @@ public class TestUtils {
 	public static Card testNewUserCard = Card.builder()
 			.clientId(testUser().getId())
 			.status(CardStatus.ACTIVE)
+			.cardHolder("Вася Пупкин")
 			.build();
 	
 	public static Card testNewSavedCard = Card.builder()
 			.id(UUID.fromString("f70907df-196d-483f-8faa-b04e9d988b0c"))
 			.clientId(testUser().getId())
 			.status(CardStatus.ACTIVE)
+			.cardHolder("Вася Пупкин")
 			.build();
 	
 	public static Card testBlockedCard = Card.builder()
 			.id(UUID.fromString("f70907df-196d-483f-8faa-b04e9d988b0c"))
 			.clientId(testUser().getId())
 			.status(CardStatus.BLOCKED)
+			.cardHolder("Вася Пупкин")
 			.build();
 	
 	public static CardResponseDto testCardResponseDto = new CardResponseDto(
-			UUID.fromString("f70907df-196d-483f-8faa-b04e9d988b0c"),
-			testUser().getId(),
 			"1234 5678 9012 3456",
 			"Вася Пупкин",
 			String.valueOf(LocalDate.of(2030, 1, 1)),

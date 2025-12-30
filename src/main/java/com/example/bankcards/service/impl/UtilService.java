@@ -1,5 +1,6 @@
 package com.example.bankcards.service.impl;
 
+import com.example.bankcards.dto.response.CardResponseDto;
 import com.example.bankcards.entity.User;
 import com.example.bankcards.exception.authorizationException.SecurityContextHolderException;
 import com.example.bankcards.properties.CardProperties;
@@ -22,6 +23,20 @@ public class UtilService {
 	
 	private final CardProperties cardProperties;
 	private final CardRepository cardRepository;
+	
+	public CardResponseDto maskCardNumber(CardResponseDto card) {
+		return new CardResponseDto(
+				maskCardNumber(card.cardNumber()),
+				card.cardHolder(),
+				card.expirationDate(),
+				card.status(),
+				card.balance()
+		);
+	}
+	
+	public String maskCardNumber(String cardNumber) {
+		return "**** **** **** %s".formatted(cardNumber.substring(15));
+	}
 	
 	/**
 	 * Получить уникальный идентификатор пользователя из контекста безопасности

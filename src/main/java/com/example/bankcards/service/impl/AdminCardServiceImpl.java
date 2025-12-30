@@ -42,8 +42,9 @@ public class AdminCardServiceImpl implements AdminCardService {
 			UserResponseDto existingUser = userService.findById(cardRequestDto.clientId());
 			Card newCard = cardMapper.mapRequestToEntity(cardRequestDto, existingUser);
 			Card savedCard = cardRepository.save(newCard);
+			CardResponseDto cardResponseDto = cardMapper.mapEntityToResponse(savedCard);
 			
-			return cardMapper.mapEntityToResponse(savedCard);
+			return utilService.maskCardNumber(cardResponseDto);
 		}
 
 		@Override
@@ -94,7 +95,10 @@ public class AdminCardServiceImpl implements AdminCardService {
 			
 			long totalCards = cardRepository.count();
 			long totalPages = (totalCards / pageLimit) + 1;
-			List<CardResponseDto> cardResponseDtoList = cardsPage.stream().map(cardMapper::mapEntityToResponse).toList();
+			List<CardResponseDto> cardResponseDtoList = cardsPage.stream()
+					.map(cardMapper::mapEntityToResponse)
+					.map(utilService::maskCardNumber)
+					.toList();
 			
 			return new CardPageViewResponseDto(paginationPage + 1, pageLimit, totalPages, totalCards, cardResponseDtoList);
 		}
@@ -109,7 +113,10 @@ public class AdminCardServiceImpl implements AdminCardService {
 			
 			long totalCards = cardRepository.count();
 			long totalPages = (totalCards / pageLimit) + 1;
-			List<CardResponseDto> cardResponseDtoList = cardsPage.stream().map(cardMapper::mapEntityToResponse).toList();
+			List<CardResponseDto> cardResponseDtoList = cardsPage.stream()
+					.map(cardMapper::mapEntityToResponse)
+					.map(utilService::maskCardNumber)
+					.toList();
 			
 			return new CardPageViewResponseDto(paginationPage + 1, pageLimit, totalPages, totalCards, cardResponseDtoList);
 		}
