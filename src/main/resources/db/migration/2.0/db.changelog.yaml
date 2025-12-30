@@ -2,3 +2,9 @@ databaseChangeLog:
   - include:
       file: insert_roles.sql
       relativeToChangelogFile: true
+  - include:
+      file: insert_users.sql
+      relativeToChangelogFile: true
+  - include:
+      file: insert_user_roles.sql
+      relativeToChangelogFile: true
