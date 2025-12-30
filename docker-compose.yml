@@ -1,9 +1,72 @@
-# 
-# docker-compose.yml — определяет сервисы для разработки и тестирования.
+services:
 
-#Что нужно сделать:
-#  - Настроить сервисы для:
-#      - PostgreSQL (или MySQL) с начальной базой.
-#      - Приложения Spring Boot (если нужно).
-#  - Открыть нужные порты (например, 5432, 8080).
-#  - Настроить volume для хранения данных БД.
+  bank-rest-service:
+    build: .
+    image: bankcards:latest
+    container_name: bank-rest-service
+    ports:
+      - "700:700"
+    depends_on:
+      bank-db:
+        condition: service_healthy
+    networks:
+      - bank-service-net
+    environment:
+      - TZ=Europe/Moscow
+      - POSTGRES_DB=back_cards_db
+      - POSTGRES_HOST=bank-db:5432
+      - POSTGRES_USERNAME=postgres
+      - POSTGRES_PASSWORD=postgres
+
+      - JWT_ISSUER=user-service
+      - JWT_ACCESS_EXPIRATION_MS=900000
+      - JWT_REFRESH_EXPIRATION_MS=1800000
+      - JWT_AUDIENCE=user-service-api
+
+      - JWT_ACCESS_PUBLIC_KEY=classpath:keys/access_public.pem
+      - JWT_REFRESH_PUBLIC_KEY=classpath:keys/refresh_public.pem
+      - JWT_ACCESS_PRIVATE_KEY=classpath:keys/access_private.pem
+      - JWT_REFRESH_PRIVATE_KEY=classpath:keys/refresh_private.pem
+
+      - LIQUIBASE_ENABLE=true
+      - DDL_AUTO=none
+
+      - CARD_BIN_PREFIX=456126
+
+      - OPEN_API_DOCS_URL=/docs/openapi.yaml
+      - OPEN_API_PATH=/swagger-ui/index.html
+
+  bank-db:
+    image: postgres:16.1-alpine
+    container_name: bank-db
+    ports:
+      - "5555:5432"
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: back_cards_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data:Z
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - bank-service-net
+    logging:
+      driver: json-file  # Логи в JSON-формате
+      options:
+        labels: "env=dev,name=database"  # Лейблы
+        tag: "{{.Name}}"  # Доп. теги для логов
+    labels:
+      - "env=dev"        # Лейблы для контейнера
+      - "name={{.Name}}"
+
+volumes:
+  postgres_data:
+
+networks:
+  bank-service-net:
+    driver: bridge

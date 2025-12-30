@@ -45,4 +45,21 @@ public class Card {
 	@Enumerated(EnumType.STRING)
 	private CardStatus status;
 	private BigDecimal balance;
+	
+	@Override
+	public String toString() {
+		return """
+				Card{
+					id='%s',
+					version='%s',
+					clientId='%s',
+					cardNumber='**** **** ****%s',
+					cardHolder='%s',
+					expirationDate='%s',
+					cvv='***',
+					status='%s',
+					balance='%s'
+				}
+				""".formatted(id, version, clientId, cardNumber.substring(14), cardHolder, expirationDate, status, balance);
+	}
 }

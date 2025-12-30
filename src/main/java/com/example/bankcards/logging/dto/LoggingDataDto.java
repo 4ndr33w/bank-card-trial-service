@@ -1,4 +1,4 @@
-package com.example.bankcards.aspect.dto;
+package com.example.bankcards.logging.dto;
 
 /**
  * Объект для хранения данных об объекте логирования

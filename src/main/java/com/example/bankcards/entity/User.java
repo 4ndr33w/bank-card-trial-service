@@ -19,7 +19,6 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.data.annotation.Version;
 
-import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.HashSet;
@@ -65,4 +64,25 @@ public class User {
 	@ManyToMany(fetch = FetchType.EAGER)
 	@JoinTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
 	private Set<Role> roles = new HashSet<>();
+	
+	@Override
+	public String toString() {
+		return """
+				User {
+				id='%s',
+				version='%s',
+				name='%s',
+				lastName='%s',
+				email='%s',
+				userName='%s',
+				password='***MASKED***'
+				birthDate='%s',
+				active='%s',
+				blocked='%s'
+				createdAt='%s',
+				updatedAt='%s'
+				roles='%s'
+				}
+				""".formatted(id, version, name, lastName, email, userName, birthDate, active, blocked, createdAt, updatedAt, roles);
+	}
 }

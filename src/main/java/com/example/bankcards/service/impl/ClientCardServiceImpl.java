@@ -6,6 +6,7 @@ import com.example.bankcards.dto.response.CardBalanceResponseDto;
 import com.example.bankcards.dto.response.CardPageViewResponseDto;
 import com.example.bankcards.dto.response.CardResponseDto;
 import com.example.bankcards.entity.Card;
+import com.example.bankcards.enums.CardStatus;
 import com.example.bankcards.exception.businessException.CardNotFoundException;
 import com.example.bankcards.repository.CardRepository;
 import com.example.bankcards.service.ClientCardService;
@@ -14,6 +15,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
@@ -34,8 +36,15 @@ public class ClientCardServiceImpl implements ClientCardService {
 	private final CardMapper cardMapper;
 	
 		@Override
+		@Transactional(isolation = Isolation.SERIALIZABLE)
 		public boolean blockCardRequest(UUID cardId) {
-				return false;
+			UUID userId = utilService.getUserIdFromSecurityContext();
+			Card existingClientCard = cardRepository.findCardByIdAndClientId(cardId, userId)
+					.orElseThrow(
+							() -> new CardNotFoundException("Не найдена карта с id: %s у пользователя с id: %s".formatted(cardId, userId)));
+			
+			existingClientCard.setStatus(CardStatus.BLOCKED);
+			return true;
 		}
 
 		@Override
