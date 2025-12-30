@@ -4,6 +4,7 @@ import com.example.bankcards.dto.request.CardRequestDto;
 import com.example.bankcards.dto.request.UserRequestDto;
 import com.example.bankcards.dto.request.UserUpdateDto;
 import com.example.bankcards.dto.response.AuthenticationResponseDto;
+import com.example.bankcards.dto.response.CardBalanceResponseDto;
 import com.example.bankcards.dto.response.CardResponseDto;
 import com.example.bankcards.dto.response.UserPageViewResponseDto;
 import com.example.bankcards.dto.response.UserResponseDto;
@@ -307,6 +308,88 @@ public class TestUtils {
 				testNewRefreshToken(),
 				testAccessTokenLifetime(),
 				testRefreshTokenLifetime()
+		);
+	}
+	
+	public static Card testCard1() {
+		return Card.builder()
+				.id(UUID.fromString("f70907df-196d-483f-8faa-b04e9d988b0c"))
+				.clientId(UUID.fromString("f70907de-196d-483f-8faa-b04e9d988b0c"))
+				.cardNumber("1234 5678 9012 3456")
+				.cardHolder("Вася Пупкин")
+				.status(CardStatus.ACTIVE)
+				.balance(new BigDecimal("1000.00"))
+				.expirationDate(LocalDate.of(2030, 1, 1))
+				.build();
+	}
+	
+	public static Card testCard2() {
+		return Card.builder()
+				.id(UUID.fromString("f70907df-196d-483f-8faa-b04e9d988b0d"))
+				.clientId(UUID.fromString("f70907de-196d-483f-8faa-b04e9d988b0c"))
+				.cardNumber("9876 5432 1098 7654")
+				.cardHolder("Вася Пупкин")
+				.status(CardStatus.ACTIVE)
+				.balance(new BigDecimal("500.00"))
+				.expirationDate(LocalDate.of(2030, 1, 1))
+				.build();
+	}
+	
+	public static Card testBlockedUserCard() {
+		return Card.builder()
+				.id(UUID.fromString("f70907df-196d-483f-8faa-b04e9d988b0e"))
+				.clientId(UUID.fromString("f70907de-196d-483f-8faa-b04e9d988b0c"))
+				.cardNumber("1111 2222 3333 4444")
+				.cardHolder("Вася Пупкин")
+				.status(CardStatus.BLOCKED)
+				.balance(new BigDecimal("0.00"))
+				.expirationDate(LocalDate.of(2030, 1, 1))
+				.build();
+	}
+	
+	public static CardResponseDto testCardResponseDto1() {
+		return new CardResponseDto(
+				"1234 5678 9012 3456",
+				"Вася Пупкин",
+				"01/30",
+				CardStatus.ACTIVE,
+				new BigDecimal("1000.00")
+		);
+	}
+	
+	public static CardResponseDto testCardResponseDto2() {
+		return new CardResponseDto(
+				"9876 5432 1098 7654",
+				"Вася Пупкин",
+				"01/30",
+				CardStatus.ACTIVE,
+				new BigDecimal("500.00")
+		);
+	}
+	
+	public static CardResponseDto testMaskedCardResponseDto1() {
+		return new CardResponseDto(
+				"1234 **** **** 3456",
+				"Вася Пупкин",
+				"01/30",
+				CardStatus.ACTIVE,
+				new BigDecimal("1000.00")
+		);
+	}
+	
+	public static CardResponseDto testMaskedCardResponseDto2() {
+		return new CardResponseDto(
+				"9876 **** **** 7654",
+				"Вася Пупкин",
+				"01/30",
+				CardStatus.ACTIVE,
+				new BigDecimal("500.00")
+		);
+	}
+	
+	public static CardBalanceResponseDto testCardBalanceResponseDto() {
+		return new CardBalanceResponseDto(
+				new BigDecimal("1234.56")
 		);
 	}
 }
