@@ -1,4 +1,4 @@
-package com.example.bankcards.service;
+package com.example.bankcards.service.impl;
 
 import com.example.bankcards.dto.response.AuthenticationResponseDto;
 import com.example.bankcards.entity.User;
@@ -8,7 +8,6 @@ import com.example.bankcards.properties.JwtProperties;
 import com.example.bankcards.repository.UserRepository;
 import com.example.bankcards.security.component.JwtTokenProvider;
 import com.example.bankcards.security.data.AppUserDetails;
-import com.example.bankcards.service.impl.AuthenticationServiceImpl;
 import com.example.bankcards.utils.TestUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

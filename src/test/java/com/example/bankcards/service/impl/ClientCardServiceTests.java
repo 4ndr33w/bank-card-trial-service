@@ -1,4 +1,4 @@
-package com.example.bankcards.service;
+package com.example.bankcards.service.impl;
 
 import com.example.bankcards.dto.mapper.CardMapper;
 import com.example.bankcards.dto.projection.CardBalanceProjection;
@@ -9,9 +9,6 @@ import com.example.bankcards.entity.Card;
 import com.example.bankcards.enums.CardStatus;
 import com.example.bankcards.exception.businessException.CardNotFoundException;
 import com.example.bankcards.repository.CardRepository;
-import com.example.bankcards.service.impl.ClientCardServiceImpl;
-import com.example.bankcards.service.impl.TransferService;
-import com.example.bankcards.service.impl.UtilService;
 import com.example.bankcards.utils.TestUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -213,33 +210,12 @@ public class ClientCardServiceTests {
 	@Test
 	@DisplayName("Получение карты по ID - успешный сценарий")
 	void findCardById_ShouldReturnCard_WhenCardBelongsToUser() {
+		Card existingCard = TestUtils.testCard1();
+		CardResponseDto cardResponse = TestUtils.testCardResponseDto1();
+		CardResponseDto maskedCardResponse = TestUtils.testMaskedCardResponseDto1();
+		
 		UUID userId = TestUtils.testUser().getId();
-		UUID cardId = UUID.fromString("f70907df-196d-483f-8faa-b04e9d988b0c");
-		
-		Card existingCard = Card.builder()
-				.id(cardId)
-				.clientId(userId)
-				.cardNumber("1234 5678 9012 3456")
-				.cardHolder("Вася Пупкин")
-				.status(CardStatus.ACTIVE)
-				.balance(new BigDecimal("1000.00"))
-				.build();
-		
-		CardResponseDto cardResponse = new CardResponseDto(
-				"1234 5678 9012 3456",
-				"Вася Пупкин",
-				"01/30",
-				CardStatus.ACTIVE,
-				new BigDecimal("1000.00")
-		);
-		
-		CardResponseDto maskedCardResponse = new CardResponseDto(
-				"1234 **** **** 3456",
-				"Вася Пупкин",
-				"01/30",
-				CardStatus.ACTIVE,
-				new BigDecimal("1000.00")
-		);
+		UUID cardId = existingCard.getId();
 		
 		when(utilService.getUserIdFromSecurityContext()).thenReturn(userId);
 		when(cardRepository.findCardByIdAndClientId(cardId, userId))
