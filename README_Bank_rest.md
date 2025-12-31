@@ -1,13 +1,48 @@
 ## README
 
 # Система управления банковскими картами
+Для запуска сервиса необходимо выполнить выполнить следующие шаги:
+### 1) Установить `OpenSSL`
+например: 
+```bash
+winget install ShiningLight.OpenSSL.Light
+```
 
-1) Билдим сервис:
+### 2) Сгенерировать ключи для подписи токенов:
+Можно использовать уже имеющиеся, но для безопасности лучше сгенерировать новые. <br>
+Необходимо зайти в каталог `src/main/resources/keys` и выполнить в нём команды:
+
+Для Access Token:
+```bash
+openssl genrsa -out access_private.pem 2048
+```
+```bash
+openssl rsa -in access_private.pem -pubout -out access_public.pem
+```
+Для Refresh Token:
+```bash
+openssl genrsa -out refresh_private.pem 2048
+```
+```bash
+openssl rsa -in refresh_private.pem -pubout -out refresh_public.pem
+```
+
+### 4) Удалить префиксы и постфиксы из ключей:
+Из каждого ключа удалить префиксы и постфиксы (-----BEGIN PRIVATE KEY----- / -----END PRIVATE KEY-----) <br>
+Как для приватных, так и для публичных ключей
+
+### 5) Выполнить компиляцию и сборку файлов проекта:
 ```bash
 mvn clean build
 ```
 
-2) апускаем сервис в Docker:
+### 6) Установить Docker:
+Если он не установлен, то можно установить через, например, `winget`:
+```bash
+winget install Docker.DockerDesktop
+```
+
+### 7) Запустить сервис в Docker:
 ```bash
 docker-compose up --build
 ```
