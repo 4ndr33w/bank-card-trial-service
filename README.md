@@ -3,7 +3,7 @@
 # Система управления банковскими картами
 Для запуска сервиса необходимо выполнить выполнить следующие шаги:
 ### 1) Установить `OpenSSL`
-например: 
+например:
 ```bash
 winget install ShiningLight.OpenSSL.Light
 ```
@@ -27,24 +27,32 @@ openssl genrsa -out refresh_private.pem 2048
 openssl rsa -in refresh_private.pem -pubout -out refresh_public.pem
 ```
 
-### 4) Удалить префиксы и постфиксы из ключей:
+### 3) Удалить префиксы и постфиксы из ключей:
 Из каждого ключа удалить префиксы и постфиксы (-----BEGIN PRIVATE KEY----- / -----END PRIVATE KEY-----) <br>
 Как для приватных, так и для публичных ключей
 
-### 5) Выполнить компиляцию и сборку файлов проекта:
-```bash
-mvn clean build
-```
-
-### 6) Установить Docker:
+### 4) Установить Docker:
 Если он не установлен, то можно установить через, например, `winget`:
 ```bash
 winget install Docker.DockerDesktop
 ```
 
+### 5) Запустить в докере базу данных Docker:
+В каталоге проекта выполнить команду:
+```bash
+docker-compose up bank-db
+
+# Или с флагом -d для запуска в фоне
+docker-compose up -d bank-db
+```
+### 6) Выполнить компиляцию и сборку файлов проекта:
+```bash
+mvn clean build
+```
+
 ### 7) Запустить сервис в Docker:
 ```bash
-docker-compose up --build
+docker-compose up bank-rest-service
 ```
 
 ### Адрес API:
@@ -74,8 +82,8 @@ docker-compose up --build
 ### Дефолтные пользователи:
 По умолчанию в сервисе уже имеются 2 пользователя:
 1) Пользователь с ролью `USER`: <br>
-login: `us3r` <br>
-password: `qwErty!23@`
+   login: `us3r` <br>
+   password: `qwErty!23@`
 
 2) Пользователь с ролями `ADMIN` и `USER`: <br>
    login: `4dm1n` <br>
