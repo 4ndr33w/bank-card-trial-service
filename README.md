@@ -69,3 +69,14 @@ docker-compose up --build
 проксируется на http://localhost:5555 из контейнера `Docker`: `bank-db:5432` <br>
 
 Имя базы данных: `back_cards_db`
+<hr/>
+
+### Дефолтные пользователи:
+По умолчанию в сервисе уже имеются 2 пользователя:
+1) Пользователь с ролью `USER`: <br>
+login: `us3r` <br>
+password: `qwErty!23@`
+
+2) Пользователь с ролями `ADMIN` и `USER`: <br>
+   login: `4dm1n` <br>
+   password: `qwErty!23@`
