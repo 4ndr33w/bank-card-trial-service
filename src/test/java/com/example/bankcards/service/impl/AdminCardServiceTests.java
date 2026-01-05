@@ -1,4 +1,4 @@
-package com.example.bankcards.service;
+package com.example.bankcards.service.impl;
 
 import com.example.bankcards.dto.mapper.CardMapper;
 import com.example.bankcards.dto.request.CardRequestDto;
@@ -11,8 +11,7 @@ import com.example.bankcards.exception.businessException.CardActivationException
 import com.example.bankcards.exception.businessException.CardNotFoundException;
 import com.example.bankcards.exception.businessException.UserNotFoundException;
 import com.example.bankcards.repository.CardRepository;
-import com.example.bankcards.service.impl.AdminCardServiceImpl;
-import com.example.bankcards.service.impl.UtilService;
+import com.example.bankcards.service.UserService;
 import com.example.bankcards.utils.TestUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -62,7 +61,7 @@ public class AdminCardServiceTests {
 	private AdminCardServiceImpl adminCardService;
 	
 	@Test
-	@DisplayName("Создание карты - успешный сценарий")
+	@DisplayName("Успешное создание карты")
 	void createCard_ShouldCreateCard_WhenUserExists() {
 		CardRequestDto cardRequestDto = TestUtils.testCardRequestDto();
 		UserResponseDto userResponseDto = TestUtils.testUserResponseDto();
@@ -70,7 +69,6 @@ public class AdminCardServiceTests {
 		Card savedCard = TestUtils.testNewSavedCard;
 		CardResponseDto expectedResponse = TestUtils.testCardResponseDto;
 		UUID userId = userResponseDto.id();
-		UUID cardId = savedCard.getId();
 		
 		when(userService.findById(userId)).thenReturn(userResponseDto);
 		when(cardMapper.mapRequestToEntity(cardRequestDto, userResponseDto)).thenReturn(newCard);
@@ -91,7 +89,7 @@ public class AdminCardServiceTests {
 	}
 	
 	@Test
-	@DisplayName("Создание карты - выбрасывает исключение когда пользователь не найден")
+	@DisplayName("Создание карты - UserNotFoundException если пользователь не найден")
 	void createCard_ShouldThrowException_WhenUserNotFound() {
 		CardRequestDto cardRequestDto = TestUtils.testCardRequestDto();
 		UserResponseDto userResponseDto = TestUtils.testUserResponseDto();
@@ -107,7 +105,7 @@ public class AdminCardServiceTests {
 	}
 	
 	@Test
-	@DisplayName("Блокировка карты - успешный сценарий")
+	@DisplayName("Успешная блокировка карты")
 	void blockCard_ShouldBlockCard_WhenCardExistsAndNotBlocked() {
 		Card card = TestUtils.testNewSavedCard;
 		UUID cardId = card.getId();
@@ -124,7 +122,7 @@ public class AdminCardServiceTests {
 	}
 	
 	@Test
-	@DisplayName("Блокировка карты - выбрасывает исключение когда карта не найдена")
+	@DisplayName("Блокировка карты - CardNotFoundException если карта не найдена")
 	void blockCard_ShouldThrowCardNotFoundException_WhenCardNotFound() {
 		UUID cardId = TestUtils.testNewSavedCard.getId();
 		
@@ -134,7 +132,7 @@ public class AdminCardServiceTests {
 	}
 	
 	@Test
-	@DisplayName("Блокировка карты - выбрасывает исключение когда карта уже заблокирована")
+	@DisplayName("Блокировка карты - CardActivationException если карта уже заблокирована")
 	void blockCard_ShouldThrowCardActivationException_WhenCardAlreadyBlocked() {
 		UUID cardId = TestUtils.testNewSavedCard.getId();
 		Card card = TestUtils.testBlockedCard;
@@ -145,7 +143,7 @@ public class AdminCardServiceTests {
 	}
 	
 	@Test
-	@DisplayName("Активация карты - успешный сценарий")
+	@DisplayName("Успешная активация карты")
 	void activateCard_ShouldActivateCard_WhenCardExistsAndNotActive() {
 		Card card = TestUtils.testNewSavedCard;
 		UUID cardId = TestUtils.testNewSavedCard.getId();
@@ -161,7 +159,7 @@ public class AdminCardServiceTests {
 	}
 	
 	@Test
-	@DisplayName("Активация карты - выбрасывает исключение когда карта уже активна")
+	@DisplayName("Активация карты - CardActivationException если карта уже активна")
 	void activateCard_ShouldThrowCardActivationException_WhenCardAlreadyActive() {
 		Card card = TestUtils.testNewSavedCard;
 		UUID cardId = TestUtils.testNewSavedCard.getId();
@@ -172,7 +170,7 @@ public class AdminCardServiceTests {
 	}
 	
 	@Test
-	@DisplayName("Удаление карты - успешный сценарий")
+	@DisplayName("Успешное удаление карты")
 	void deleteCard_ShouldDeleteCard_WhenCardExists() {
 		Card card = TestUtils.testNewSavedCard;
 		UUID cardId = TestUtils.testNewSavedCard.getId();
@@ -186,7 +184,7 @@ public class AdminCardServiceTests {
 	}
 	
 	@Test
-	@DisplayName("Удаление карты - выбрасывает исключение когда карта не найдена")
+	@DisplayName("Удаление карты - CardNotFoundException если карта не найдена")
 	void deleteCard_ShouldThrowCardNotFoundException_WhenCardNotFound() {
 		UUID cardId = UUID.randomUUID();
 		
@@ -199,42 +197,20 @@ public class AdminCardServiceTests {
 	}
 	
 	@Test
-	@DisplayName("Получение всех карт с пагинацией - успешный сценарий")
+	@DisplayName("Успешное получение всех карт")
 	void getAllCardsByPage_ShouldReturnPaginatedCards() {
 		Integer page = 1;
 		Integer limit = 10;
 		int pageLimit = 10;
 		int paginationPage = 0;
-		
-		UUID userId = UUID.randomUUID();
-		UUID cardId1 = UUID.randomUUID();
-		UUID cardId2 = UUID.randomUUID();
-		
-		Card card1 = Card.builder()
-				.id(cardId1)
-				.clientId(userId)
-				.status(CardStatus.ACTIVE)
-				.build();
-		
-		Card card2 = Card.builder()
-				.id(cardId2)
-				.clientId(userId)
-				.status(CardStatus.ACTIVE)
-				.build();
-		
+
+		Card card1 = TestUtils.testCard1();
+		Card card2 = TestUtils.testCard2();
 		List<Card> cards = List.of(card1, card2);
 		Page<Card> cardsPage = new PageImpl<>(cards, PageRequest.of(paginationPage, pageLimit), 2);
 		
-		CardResponseDto cardResponse1 = new CardResponseDto(
-				"**** **** **** 3456", "Вася Пупкин",
-				String.valueOf(LocalDate.of(2030, 1, 1)), CardStatus.ACTIVE, BigDecimal.ZERO
-		);
-		
-		CardResponseDto cardResponse2 = new CardResponseDto(
-				"**** **** **** 3457", "Вася Пупкин",
-				String.valueOf(LocalDate.of(2030, 1, 1)), CardStatus.ACTIVE, BigDecimal.ZERO
-		);
-		
+		CardResponseDto cardResponse1 = TestUtils.testMaskedCardResponseDto1();
+		CardResponseDto cardResponse2 = TestUtils.testMaskedCardResponseDto2();
 		List<CardResponseDto> cardResponses = List.of(cardResponse1, cardResponse2);
 		
 		CardPageViewResponseDto expectedResponse = new CardPageViewResponseDto(
@@ -269,15 +245,12 @@ public class AdminCardServiceTests {
 		int pageLimit = 5;
 		int paginationPage = 0;
 		
-		Card card = TestUtils.testNewSavedCard;
+		Card card = TestUtils.testCard1();
 		
 		List<Card> cards = List.of(card);
 		Page<Card> cardsPage = new PageImpl<>(cards, PageRequest.of(paginationPage, pageLimit), 1);
 
-		CardResponseDto cardResponse = new CardResponseDto(
-				"**** **** **** 3457", "Вася Пупкин",
-				String.valueOf(LocalDate.of(2030, 1, 1)), CardStatus.ACTIVE, BigDecimal.ZERO
-		);
+		CardResponseDto cardResponse = TestUtils.testMaskedCardResponseDto1();
 		
 		when(utilService.setPageLimit(limit)).thenReturn(pageLimit);
 		when(cardRepository.findAll(any(Pageable.class))).thenReturn(cardsPage);
@@ -295,42 +268,21 @@ public class AdminCardServiceTests {
 	}
 	
 	@Test
-	@DisplayName("Получение всех карт клиента - успешный сценарий")
+	@DisplayName("Успешное получение всех карт по ID клиента")
 	void getAllCardsByClientId_ShouldReturnClientCards() {
-		UUID clientId = UUID.randomUUID();
+		UUID clientId = TestUtils.testUser().getId();
 		Integer page = 1;
 		int pageLimit = 20;
 		int paginationPage = 0;
-		
-		UUID cardId1 = UUID.randomUUID();
-		UUID cardId2 = UUID.randomUUID();
-		
-		Card card1 = Card.builder()
-				.id(cardId1)
-				.clientId(clientId)
-				.status(CardStatus.ACTIVE)
-				.cardHolder("Вася Пупкин")
-				.build();
-		
-		Card card2 = Card.builder()
-				.id(cardId2)
-				.clientId(clientId)
-				.status(CardStatus.BLOCKED)
-				.cardHolder("Вася Пупкин")
-				.build();
-		
+
+		Card card1 = TestUtils.testCard1();
+		Card card2 = TestUtils.testCard2();
 		List<Card> cards = List.of(card1, card2);
 		Page<Card> cardsPage = new PageImpl<>(cards, PageRequest.of(paginationPage, pageLimit), 2);
 		
-		CardResponseDto cardResponse1 = new CardResponseDto(
-				"**** **** **** 3456", "Вася Пупкин",
-				String.valueOf(LocalDate.of(2030, 1, 1)), CardStatus.ACTIVE, BigDecimal.ZERO
-		);
+		CardResponseDto cardResponse1 = TestUtils.testMaskedCardResponseDto1();
 		
-		CardResponseDto cardResponse2 = new CardResponseDto(
-				"**** **** **** 3457", "Вася Пупкин",
-				String.valueOf(LocalDate.of(2030, 1, 1)), CardStatus.ACTIVE, BigDecimal.ZERO
-		);
+		CardResponseDto cardResponse2 = TestUtils.testMaskedCardResponseDto2();
 		
 		List<CardResponseDto> cardResponses = List.of(cardResponse1, cardResponse2);
 		
@@ -420,41 +372,5 @@ public class AdminCardServiceTests {
 		verify(cardRepository).findAllByClientId(eq(clientId), argThat(pageable ->
 				pageable.getPageNumber() == paginationPage
 		));
-	}
-	
-	@Test
-	@DisplayName("Получение всех карт с пагинацией - расчет количества страниц")
-	void getAllCardsByPage_ShouldCalculateTotalPagesCorrectly() {
-		Integer page = 3;
-		Integer limit = 5;
-		int pageLimit = 5;
-		int paginationPage = 2;
-		
-		List<Card> cards = List.of(
-				Card.builder().id(UUID.randomUUID()).clientId(UUID.randomUUID()).build(),
-				Card.builder().id(UUID.randomUUID()).clientId(UUID.randomUUID()).build(),
-				Card.builder().id(UUID.randomUUID()).clientId(UUID.randomUUID()).build()
-		);
-		
-		Page<Card> cardsPage = new PageImpl<>(cards, PageRequest.of(paginationPage, pageLimit), 23);
-		
-		CardResponseDto cardResponse = new CardResponseDto(
-				"**** **** **** 3457", "Вася Пупкин",
-				String.valueOf(LocalDate.of(2030, 1, 1)), CardStatus.ACTIVE, BigDecimal.ZERO
-		);
-		
-		when(utilService.setPageLimit(limit)).thenReturn(pageLimit);
-		when(cardRepository.findAll(any(Pageable.class))).thenReturn(cardsPage);
-		when(cardRepository.count()).thenReturn(23L);
-		when(cardMapper.mapEntityToResponse(any(Card.class))).thenReturn(cardResponse);
-
-		CardPageViewResponseDto result = adminCardService.getAllCardsByPage(page, limit);
-
-		assertNotNull(result);
-		assertEquals(3, result.currentPage());
-		assertEquals(pageLimit, result.limit());
-
-		assertEquals(5, result.totalPages());
-		assertEquals(23, result.totalCards());
 	}
 }

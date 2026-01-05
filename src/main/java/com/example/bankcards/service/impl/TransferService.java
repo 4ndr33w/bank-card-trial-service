@@ -2,6 +2,7 @@ package com.example.bankcards.service.impl;
 
 import com.example.bankcards.entity.Card;
 import com.example.bankcards.exception.businessException.CardBalanceException;
+import com.example.bankcards.exception.businessException.NegativeTransferAmountException;
 import com.example.bankcards.repository.CardRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -27,6 +28,9 @@ public class TransferService {
 		BigDecimal cardToBalance = cardTo.getBalance();
 		if(cardFromBalance.compareTo(amount) < 0) {
 			throw new CardBalanceException("Недостаточно средств для выполнения операции перевода");
+		}
+		if(amount.compareTo(BigDecimal.ZERO) < 0) {
+			throw new NegativeTransferAmountException("Сумма перевода не может быть отрицательной");
 		}
 		if(cardFrom.equals(cardTo)) {
 			return  true;
