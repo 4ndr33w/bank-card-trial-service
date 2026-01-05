@@ -5,6 +5,7 @@ import com.example.bankcards.dto.request.UserRequestDto;
 import com.example.bankcards.dto.request.UserUpdateDto;
 import com.example.bankcards.dto.response.AuthenticationResponseDto;
 import com.example.bankcards.dto.response.CardBalanceResponseDto;
+import com.example.bankcards.dto.response.CardPageViewResponseDto;
 import com.example.bankcards.dto.response.CardResponseDto;
 import com.example.bankcards.dto.response.UserPageViewResponseDto;
 import com.example.bankcards.dto.response.UserResponseDto;
@@ -12,6 +13,13 @@ import com.example.bankcards.entity.Card;
 import com.example.bankcards.entity.Role;
 import com.example.bankcards.entity.User;
 import com.example.bankcards.enums.CardStatus;
+import com.example.bankcards.properties.JwtProperties;
+import com.example.bankcards.security.component.JwtTokenProvider;
+import com.example.bankcards.security.component.KeyProvider;
+import com.example.bankcards.security.data.AppUserDetails;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.DefaultResourceLoader;
+import org.springframework.core.io.ResourceLoader;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -26,6 +34,9 @@ import java.util.UUID;
  * @version 1.0
  */
 public class TestUtils {
+	
+	@Autowired
+	private JwtTokenProvider tokenProvider;
 	
 	public static UserRequestDto testUserRequestDto() {
 		return new UserRequestDto(
@@ -79,6 +90,50 @@ public class TestUtils {
 				true,
 				false,
 				Set.of(testUserRole())
+		);
+	}
+	
+	public static UserRequestDto invalidUserRequestWithoutName() {
+		return new UserRequestDto(
+				null,
+				"Пупкин",
+				"pup0k@example.ru",
+				"pup0ck",
+				"qwErty!23@",
+				LocalDate.of(1999, 1, 1)
+		);
+	}
+	
+	public static UserRequestDto invalidUserRequestWithoutEmail() {
+		return new UserRequestDto(
+				"Вася",
+				"Пупкин",
+				"invalid-email",
+				"pup0ck",
+				"qwErty!23@",
+				LocalDate.of(1999, 1, 1)
+		);
+	}
+	
+	public static UserRequestDto invalidUserRequestWithInvalidPassword() {
+		return new UserRequestDto(
+				"Вася",
+				"Пупкин",
+				"pup0k@example.ru",
+				"pup0ck",
+				"123",
+				LocalDate.of(1999, 1, 1)
+		);
+	}
+	
+	public static UserRequestDto invalidUserRequestWithInvalidBirthDate() {
+		return new UserRequestDto(
+				"Вася",
+				"Пупкин",
+				"pup0k@example.ru",
+				"pup0ck",
+				"qwErty!23@",
+				LocalDate.now().plusDays(1)
 		);
 	}
 	
@@ -369,7 +424,7 @@ public class TestUtils {
 	
 	public static CardResponseDto testMaskedCardResponseDto1() {
 		return new CardResponseDto(
-				"1234 **** **** 3456",
+				"**** **** **** 3456",
 				"Вася Пупкин",
 				"01/30",
 				CardStatus.ACTIVE,
@@ -379,7 +434,7 @@ public class TestUtils {
 	
 	public static CardResponseDto testMaskedCardResponseDto2() {
 		return new CardResponseDto(
-				"9876 **** **** 7654",
+				"**** **** **** 7654",
 				"Вася Пупкин",
 				"01/30",
 				CardStatus.ACTIVE,
@@ -391,5 +446,37 @@ public class TestUtils {
 		return new CardBalanceResponseDto(
 				new BigDecimal("1234.56")
 		);
+	}
+	
+	public static CardPageViewResponseDto testCardPageViewResponseDto() {
+		return new CardPageViewResponseDto(
+				1,
+				10,
+				1,
+				2,
+				List.of(testMaskedCardResponseDto1(), testMaskedCardResponseDto2())
+				);
+	}
+	
+//	public static void setSecurityContext() {
+//
+//		UserDetails userDetails = new AppUserDetails(testUser());
+//
+//		UsernamePasswordAuthenticationToken authentication =
+//				new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+//		authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(new MockHttpServletRequest()));
+//
+//		SecurityContextHolder.getContext().setAuthentication(authentication);
+//	}
+	
+	public static String generateBearerToken() {
+		
+		ResourceLoader resourceLoader = new DefaultResourceLoader();
+		JwtProperties jwtProperties = new JwtProperties();
+		KeyProvider keyProvider = new KeyProvider(resourceLoader);
+		JwtTokenProvider jwtTokenProvider = new JwtTokenProvider(jwtProperties, keyProvider);
+		String token = jwtTokenProvider.createAccessToken(new AppUserDetails(testUser()));
+		
+		return "Bearer " + token;
 	}
 }

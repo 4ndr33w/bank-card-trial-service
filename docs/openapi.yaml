@@ -23,7 +23,7 @@ paths:
           description: Успешно получены данные собственого профиля аутенфицированного пользователя
           content:
             application/json:
-              schema:
+              schema: 
                 type: object
                 properties:
                   id:

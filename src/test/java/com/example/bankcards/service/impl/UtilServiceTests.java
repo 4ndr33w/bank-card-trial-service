@@ -1,11 +1,12 @@
-package com.example.bankcards.service;
+package com.example.bankcards.service.impl;
 
 import com.example.bankcards.entity.User;
 import com.example.bankcards.exception.authorizationException.SecurityContextHolderException;
 import com.example.bankcards.properties.CardProperties;
 import com.example.bankcards.repository.CardRepository;
 import com.example.bankcards.security.data.AppUserDetails;
-import com.example.bankcards.service.impl.UtilService;
+import com.example.bankcards.utils.TestUtils;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -49,83 +50,75 @@ public class UtilServiceTests {
 	private UtilService utilService;
 	
 	@Test
+	@DisplayName("Успешное получение ID пользователя из контекста безопасности")
 	void getUserIdFromSecurityContext_ShouldReturnUserId_WhenUserIsAuthenticated() {
-		// Arrange
-		UUID expectedUserId = UUID.randomUUID();
-		User user = new User();
-		user.setId(expectedUserId);
+		User user = TestUtils.testUser();
+		UUID expectedUserId = user.getId();
 		
 		AppUserDetails userDetails = new AppUserDetails(user);
 		
 		when(securityContext.getAuthentication()).thenReturn(authentication);
 		when(authentication.getPrincipal()).thenReturn(userDetails);
 		SecurityContextHolder.setContext(securityContext);
-		
-		// Act
+
 		UUID result = utilService.getUserIdFromSecurityContext();
-		
-		// Assert
+
 		assertEquals(expectedUserId, result);
 	}
 	
 	@Test
+	@DisplayName("Ошибка получения ID пользователя из контекста безопасности")
 	void getUserIdFromSecurityContext_ShouldThrowException_WhenSecurityContextError() {
-		// Arrange
 		when(securityContext.getAuthentication()).thenReturn(null);
 		SecurityContextHolder.setContext(securityContext);
-		
-		// Act & Assert
+
 		assertThrows(SecurityContextHolderException.class, () -> utilService.getUserIdFromSecurityContext());
 	}
 	
 	@Test
+	@DisplayName("Получить  минимальное значение лимита записей на странице при null")
 	void setPageLimit_ShouldReturnDefault_WhenLimitIsNull() {
-		// Act
 		int result = utilService.setPageLimit(null);
-		
-		// Assert
+
 		assertEquals(5, result);
 	}
 	
 	@Test
+	@DisplayName("Получить дефолтное минимальное значение лимита записей на странице при значении меньше 1")
 	void setPageLimit_ShouldReturnDefault_WhenLimitIsLessThanOne() {
-		// Act
 		int result = utilService.setPageLimit(0);
-		
-		// Assert
+
 		assertEquals(5, result);
 	}
 	
 	@Test
+	@DisplayName("Получить дефолтное максимальное значение лимита записей на странице при значении больше 20")
 	void setPageLimit_ShouldReturnMax_WhenLimitIsGreaterThanTwenty() {
-		// Act
 		int result = utilService.setPageLimit(25);
-		
-		// Assert
+
 		assertEquals(20, result);
 	}
 	
 	@Test
+	@DisplayName("Получить значение лимита записей на странице при корректном значении")
 	void setPageLimit_ShouldReturnSameValue_WhenLimitIsValid() {
-		// Act
 		int result = utilService.setPageLimit(15);
-		
-		// Assert
+
 		assertEquals(15, result);
 	}
 	
 	@Test
+	@DisplayName("Успешная генерация CVV")
 	void generateCvv_ShouldReturnThreeDigitString() {
-		// Act
 		String result = utilService.generateCvv();
 		
-		// Assert
 		assertNotNull(result);
 		assertEquals(3, result.length());
 		assertTrue(result.matches("\\d{3}"));
 	}
 	
 	@Test
+	@DisplayName("Успешная генерация номера карты")
 	void generateCardNumber_ShouldReturnUniqueCardNumber() {
 		when(cardProperties.getBinPrefix()).thenReturn(123456);
 		when(cardRepository.existsByCardNumber(anyString()))

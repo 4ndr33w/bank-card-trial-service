@@ -1,4 +1,4 @@
-package com.example.bankcards.service;
+package com.example.bankcards.service.impl;
 
 import com.example.bankcards.dto.mapper.UserMapper;
 import com.example.bankcards.dto.request.UserRequestDto;
@@ -13,8 +13,6 @@ import com.example.bankcards.exception.businessException.UserCreationException;
 import com.example.bankcards.exception.businessException.UserNotFoundException;
 import com.example.bankcards.repository.RoleRepository;
 import com.example.bankcards.repository.UserRepository;
-import com.example.bankcards.service.impl.UserServiceImpl;
-import com.example.bankcards.service.impl.UtilService;
 import com.example.bankcards.utils.TestUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -38,7 +36,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -260,11 +257,9 @@ public class UserServiceTests {
 	// ============================================================
 	
 	
-	
-	
-	
-	
-	
+	// ============================================================
+	// =======================FIND_BY_EMAIL========================
+	// ============================================================
 	@Test
 	@DisplayName("Успешное получение пользователя по email")
 	void findByEmail_ShouldReturnUser_WhenEmailExists() {
@@ -282,7 +277,14 @@ public class UserServiceTests {
 		verify(userRepository).findByEmail(email);
 		verify(userMapper).mapToDto(existingUser);
 	}
+	// ============================================================
+	// =======================FIND_BY_EMAIL========================
+	// ============================================================
 	
+	
+	// ============================================================
+	// =====================FIND_ALL_BY_PAGE=======================
+	// ============================================================
 	@Test
 	@DisplayName("Получение списка пользователей с пагинацией")
 	void findAllByPage_ShouldReturnPaginatedUsers() {
@@ -348,7 +350,14 @@ public class UserServiceTests {
 		assertEquals(1, result.currentPage());
 		verify(utilService).setPageLimit(limit);
 	}
+	// ============================================================
+	// =====================FIND_ALL_BY_PAGE=======================
+	// ============================================================
 	
+	
+	// ============================================================
+	// ==========================BLOCK=============================
+	// ============================================================
 	@Test
 	@DisplayName("Попытка блокировки уже заблокированного пользователя")
 	void block_ShouldReturnTrue_WhenUserIsBlocked() {
@@ -378,7 +387,14 @@ public class UserServiceTests {
 		verify(utilService).getUserFromSecurityContext();
 		verify(userRepository).blockUserById(authenticatedUser.getId());
 	}
+	// ============================================================
+	// ==========================BLOCK=============================
+	// ============================================================
 	
+	
+	// ============================================================
+	// ========================DEACTIVATE==========================
+	// ============================================================
 	@Test
 	@DisplayName("Успешная деактивация пользователя")
 	void deactivate_ShouldReturnTrue_WhenUserIsDeactivated() {
@@ -393,7 +409,14 @@ public class UserServiceTests {
 		verify(utilService).getUserFromSecurityContext();
 		verify(userRepository).deactivateUserById(authenticatedUser.getId());
 	}
+	// ============================================================
+	// ========================DEACTIVATE==========================
+	// ============================================================
 	
+	
+	// ============================================================
+	// =====================FIND_BY_USER_NAME======================
+	// ============================================================
 	@Test
 	@DisplayName("Успешное получение пользователя по userName")
 	void findByUserName_ShouldReturnUser_WhenUserNameExists() {
@@ -416,4 +439,7 @@ public class UserServiceTests {
 		verify(utilService).getUserFromSecurityContext();
 		verify(userMapper).mapToDto(authenticatedUser);
 	}
+	// ============================================================
+	// =====================FIND_BY_USER_NAME======================
+	// ============================================================
 }

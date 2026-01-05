@@ -1,0 +1,57 @@
+server:
+  port: 700
+
+spring:
+  application:
+    name: bank-rest-service
+  config:
+    import: optional:file:.env[.properties]
+
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://${POSTGRES_HOST}/${POSTGRES_DB}
+    username: ${POSTGRES_USERNAME:postgres}
+    password: ${POSTGRES_PASSWORD}
+
+  main:
+    allow-bean-definition-overriding: true
+  autoconfigure:
+    exclude: org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
+
+  jpa:
+    hibernate:
+      ddl-auto: ${DDL_AUTO:none}
+    properties:
+      hibernate:
+        show_sql: ${SHOW_SQL:true}
+        format_sql: ${SHOW_SQL:true}
+        use_sql_comments: true
+        jdbc:
+          time_zone: UTC
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    open-in-view: false
+
+  liquibase:
+    enabled: ${LIQUIBASE_ENABLE:true}
+    change-log: "classpath:db/migration/db.changelog-master.yaml"
+
+jwt:
+  accessTokenLifetime: 900000
+  refreshTokenLifetime: 1500000
+  issuer: ${JWT_ISSUER}
+  audience: ${JWT_AUDIENCE}
+  accessPublic: ${JWT_ACCESS_PUBLIC_KEY}
+  refreshPublic: ${JWT_REFRESH_PUBLIC_KEY}
+  accessPrivate: ${JWT_ACCESS_PRIVATE_KEY}
+  refreshPrivate: ${JWT_REFRESH_PRIVATE_KEY}
+
+card:
+  binPrefix: ${CARD_BIN_PREFIX}
+
+logging:
+  level:
+    root: DEBUG
+    org.hibernate.internal.util.EntityPrinter: OFF
+    org.hibernate.type.descriptor.sql.BasicBinder: OFF
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicExtractor: OFF
