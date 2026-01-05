@@ -1,4 +1,4 @@
-package com.example.bankcards.service;
+package com.example.bankcards.service.impl;
 
 import com.example.bankcards.dto.mapper.UserMapper;
 import com.example.bankcards.dto.request.UserUpdateDto;
@@ -11,7 +11,6 @@ import com.example.bankcards.exception.businessException.UserNotFoundException;
 import com.example.bankcards.exception.businessException.UserRoleException;
 import com.example.bankcards.repository.RoleRepository;
 import com.example.bankcards.repository.UserRepository;
-import com.example.bankcards.service.impl.AdminServiceImpl;
 import com.example.bankcards.utils.TestUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -32,7 +31,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -59,7 +57,7 @@ public class AdminServiceTests {
 	private AdminServiceImpl adminService;
 	
 	@Test
-	@DisplayName("Удаление пользователя по ID - успешный сценарий")
+	@DisplayName("Успешное удаление пользователя по ID")
 	void deleteByClientId_ShouldDeleteUser_WhenUserExists() {
 		UUID userId = TestUtils.testUser().getId();
 		User existingUser = TestUtils.testUser();
@@ -89,7 +87,7 @@ public class AdminServiceTests {
 	}
 	
 	@Test
-	@DisplayName("Обновление пользователя по ID - успешный сценарий")
+	@DisplayName("Успешное обновление пользователя по ID")
 	void updateByClientId_ShouldUpdateUser_WhenUserExists() {
 		UUID clientId = TestUtils.testUser().getId();
 		UserUpdateDto updateDto = TestUtils.testUserUpdateDto();
@@ -131,7 +129,7 @@ public class AdminServiceTests {
 	}
 	
 	@Test
-	@DisplayName("Блокировка пользователя по ID - успешный сценарий")
+	@DisplayName("Успешная блокировка пользователя по ID")
 	void blockByClientId_ShouldReturnTrue_WhenUserBlocked() {
 		UUID clientId = TestUtils.testUser().getId();
 		
@@ -157,7 +155,7 @@ public class AdminServiceTests {
 	}
 	
 	@Test
-	@DisplayName("Разблокировка пользователя по ID - успешный сценарий")
+	@DisplayName("Успешная разблокировка пользователя по ID")
 	void unblockByClientId_ShouldReturnTrue_WhenUserUnblocked() {
 		UUID clientId = TestUtils.testUser().getId();
 		
@@ -170,7 +168,7 @@ public class AdminServiceTests {
 	}
 	
 	@Test
-	@DisplayName("Активация пользователя по ID - успешный сценарий")
+	@DisplayName("Успешная активация пользователя по ID")
 	void activateByClientId_ShouldReturnTrue_WhenUserActivated() {
 		UUID clientId = TestUtils.testUser().getId();
 		
@@ -183,7 +181,7 @@ public class AdminServiceTests {
 	}
 	
 	@Test
-	@DisplayName("Деактивация пользователя по ID - успешный сценарий")
+	@DisplayName("Успешная деактивация пользователя по ID")
 	void deactivateByClientId_ShouldReturnTrue_WhenUserDeactivated() {
 		UUID clientId = TestUtils.testUser().getId();
 		
@@ -196,7 +194,7 @@ public class AdminServiceTests {
 	}
 	
 	@Test
-	@DisplayName("Добавление роли пользователю - успешный сценарий")
+	@DisplayName("Успешное добавление роли пользователю")
 	void addRoleToUser_ShouldAddRole_WhenUserExistsAndRoleNotPresent() {
 		UUID clientId = TestUtils.testUser().getId();
 		UserRole role = UserRole.ADMIN;
@@ -298,7 +296,7 @@ public class AdminServiceTests {
 	}
 	
 	@Test
-	@DisplayName("Удаление роли у пользователя - успешный сценарий")
+	@DisplayName("Успешное удаление роли у пользователя")
 	void removeRoleFromUser_ShouldRemoveRole_WhenUserExistsAndRolePresent() {
 		UUID userId = TestUtils. testUserWithUserAndAdminRoles().getId();
 		UserRole roleToRemove = UserRole.USER;
@@ -440,7 +438,7 @@ public class AdminServiceTests {
 
 		assertTrue(result);
 		assertFalse(userWithAllRoles.getRoles().contains(userRole));
-		assertTrue(userWithAllRoles.getRoles().contains(adminRole)); // ADMIN роль осталась
+		assertTrue(userWithAllRoles.getRoles().contains(adminRole));
 
 		verify(roleRepository).findByRole(roleToRemove.getValue());
 		verify(userRepository).findById(userId);
